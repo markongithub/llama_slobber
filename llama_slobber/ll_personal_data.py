@@ -12,44 +12,37 @@ from llama_slobber.ll_local_io import LLHEADER
 from llama_slobber.handle_conn_err import handle_conn_err
 
 
-def find_info(person, data, field):
-    """
-    Parse a llama's page for metadata
-
-    Input:
-        person -- dictionary of personal data for this llama
-        data -- partial text of a person page
-        field -- data we are looking for
-    """
-    position = data.find(field+':')
-    if position > -1:
-        value = data[position:].split(':')[1].split('\n')[0].strip()
-        person[field] = value
-
-
 class GetPersonalInfo(HTMLParser):
     """
     Parse profile page.
     """
     def __init__(self):
         HTMLParser.__init__(self)
-        self.parsetext = False
+        self.current_attr = None
+        self.entering_demolabel = False
         self.result = {}
 
     def handle_starttag(self, tag, attrs):
         """
         Find personal data
         """
-        if tag == 'p':
+        if tag == 'span':
             for apt in attrs:
                 if apt[0] == 'class':
-                    if apt[1].startswith('close'):
-                        self.parsetext = True
+                    if apt[1].startswith('demolabel'):
+                        self.entering_demolabel = True
 
     def handle_data(self, data):
-        if self.parsetext:
-            for field in ['Gender', 'Location', 'College']:
-                find_info(self.result, data, field)
+        if self.entering_demolabel:
+            attr_name = data.strip().strip(':')
+            if attr_name in ["Gender", "Location", "College"]:
+                self.current_attr = attr_name
+            self.entering_demolabel = False
+            return
+        if self.current_attr and data != ":":
+            self.result[self.current_attr] = data.strip()
+            self.current_attr = None
+            return
 
     def handle_endtag(self, tag):
         if tag == 'p':
