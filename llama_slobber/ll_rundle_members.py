@@ -40,7 +40,7 @@ class GetRundleMembers(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag == 'a':
-            if self.notlogin:
+            if self.lname and self.notlogin:
                 self.result.append(self.lname)
         self.notlogin = False
         self.lname = ''
