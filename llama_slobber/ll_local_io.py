@@ -49,7 +49,7 @@ def get_session():
     return ses1
 
 
-def get_page_data(url, parser, session=None):
+def get_page_data(url, parser, session=None, cache_path='./cache'):
     """
     Extract data from a url
 
@@ -64,6 +64,19 @@ def get_page_data(url, parser, session=None):
     if session is None:
         session = get_session()
     main_data = session.get(url)
+    if cache_path:
+        cache_filename = f"{cache_path}/{url[30:]}"
+        try:
+            with open(cache_filename, 'r') as file:
+                text = file.read()
+                print(f"Loaded {cache_filename} from disk")
+        except FileNotFoundError:
+                print(f"Cache not found on disk, retrieving from web")
+                text = session.get(url).text
+                with open(cache_filename, 'w') as f:
+                    f.write(text)
+    else:
+        text = session.get(url).text
     parser1 = parser
-    parser1.feed(main_data.text)
+    parser1.feed(text)
     return parser1.result
