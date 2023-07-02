@@ -34,10 +34,11 @@ class HTMLTableParser(HTMLParser):
         self._in_th = False
         self._current_row = []
         self._current_cell = []
+        self._integer_result = None
         self.result = {
             "standings": [],
-            "max_rank_for_promotion": None,
-            "min_rank_for_staying": None}
+            "num_promotions": None,
+            "num_relegations": None}
 
     def handle_starttag(self, tag: str, attrs: List) -> None:
         """ We need to remember the opening point for the content of interest.
@@ -53,11 +54,26 @@ class HTMLTableParser(HTMLParser):
             self._in_td = True
         if self._in_table and tag == 'th':
             self._in_th = True
+        if tag == "span" and not self._integer_result:
+            for apt in attrs:
+                if apt[0] == 'class':
+                    if apt[1] == "promotion":
+                        self._integer_result = "num_promotions"
+                    elif apt[1] == "relegation":
+                        self._integer_result = "num_relegations"
+
 
     def handle_data(self, data: str) -> None:
         """ This is where we save content to a cell """
         if self._in_td or self._in_th:
             self._current_cell.append(data.strip())
+        if self._integer_result:
+            try: 
+                value = int(data)
+                self.result[self._integer_result] = value
+                self._integer_result = None
+            except ValueError:
+                pass
     
     def handle_endtag(self, tag: str) -> None:
         """ Here we exit the tags. If the closing tag is </tr>, we know that we
