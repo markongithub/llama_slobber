@@ -15,10 +15,7 @@ from llama_slobber.ll_local_io import LLSTANDINGS
 from llama_slobber.handle_conn_err import handle_conn_err
 
 
-class HTMLTableParser(HTMLParser):
-    """ This class serves as a html table parser. It is able to parse multiple
-    tables which you feed in. You can access the result per .tables field.
-    """
+class StandingsParser(HTMLParser):
     def __init__(
         self,
         decode_html_entities: bool = False,
@@ -96,40 +93,9 @@ class HTMLTableParser(HTMLParser):
         elif tag == 'table':
             self._in_table = False
 
-class GetRundleMembers(HTMLParser):
-    """
-    Parse rundle page to get players
-    """
-    def __init__(self):
-        HTMLParser.__init__(self)
-        self.lname = ''
-        self.notlogin = False
-        self.result = []
-
-    def handle_starttag(self, tag, attrs):
-        """
-        Find player reference
-        """
-        if tag == 'a':
-            for apt in attrs:
-                if apt[0] == 'href':
-                    if apt[1].startswith('/profiles.php'):
-                        tindx = apt[1].find('?') + 1
-                        self.lname = apt[1][tindx:]
-                if apt[0] == 'class':
-                    if apt[1] == 'flag':
-                        self.notlogin = True
-
-    def handle_endtag(self, tag):
-        if tag == 'a':
-            if self.lname and self.notlogin:
-                self.result.append(self.lname)
-        self.notlogin = False
-        self.lname = ''
-
 
 @handle_conn_err
-def get_rundle_members(season, rundle, session=None):
+def get_standings(season, rundle, session=None):
     """
     Get players in a rundle
 
@@ -143,9 +109,23 @@ def get_rundle_members(season, rundle, session=None):
     if session is None:
         session = get_session()
     page = "%s%d&%s" % (LLSTANDINGS, season, rundle)
-    parser = HTMLTableParser()
+    parser = StandingsParser()
     whatever = get_page_data(page, parser, session=session)
     return parser.result
+
+
+def get_rundle_members(season, rundle, session=None):
+    """
+    Get players in a rundle
+
+    Input:
+        season -- season number
+        rundle -- rundle name (B_Pacific, for example)
+        session request
+
+    Returns list of user names of players in the rundle
+    """
+    return [r[2] for r in get_standings(season, rundle, session)["standings"][1:]]
 
 
 def get_rundle_personal(season, rundle, session=None):
