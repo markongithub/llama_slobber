@@ -109,9 +109,7 @@ def get_standings(season, rundle, session=None):
     if session is None:
         session = get_session()
     page = "%s%d&%s" % (LLSTANDINGS, season, rundle)
-    parser = StandingsParser()
-    whatever = get_page_data(page, parser, session=session)
-    return parser.result
+    return get_page_data(page, StandingsParser(), session=session)
 
 
 def get_rundle_members(season, rundle, session=None):
