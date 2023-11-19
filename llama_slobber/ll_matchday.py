@@ -54,6 +54,11 @@ class GetMatchDay(HTMLParser):
                     self.getdata = True
                 if apt[1] == 'a-red':
                     print(f"I think the full text of the question, including category, was {self.ongoing_question}")
+                    end_category_index = self.ongoing_question.find(' - ')
+                    category = self.ongoing_question[1:end_category_index]
+                    text = self.ongoing_question[(end_category_index + 3):]
+                    self.current_question[CATEGORY] = category
+                    self.current_question[TEXT] = text
                     self.ongoing_question = ''
                     print(f"I think this tag's data will contain the answer.")
                     self.this_question_field = ANSWER
@@ -91,10 +96,13 @@ class GetMatchDay(HTMLParser):
         if self.this_question_field in [NUMBER, ANSWER]:
             print(f"This tag's data contains the question's {self.this_question_field} which is {data}")
             self.current_question[self.this_question_field] = data
+        if self.this_question_field == NUMBER:
             self.this_question_field = None
         if self.this_question_field == ANSWER:
             self.result['questions'].append(self.current_question)
+            print(f"self.result.questions is now {self.result['questions']}")
             self.current_question = NULL_QUESTION.copy()
+            self.this_question_field = None
         if self.this_question_field == TEXT:
             print(f"I think some of the question text is \"{data}\"")
             self.ongoing_question += data
@@ -196,7 +204,7 @@ def get_matchday(season, day, rundle, session=None):
     if session is None:
         session = get_session()
     matchday = MatchDay(season, day, rundle, session=session)
-    return [matchday.get_results(), matchday.get_info()]
+    return [matchday.get_results(), matchday.get_info(), matchday.questions]
 
 
 if __name__ == '__main__':
