@@ -145,6 +145,16 @@ def get_rundle_personal(season, rundle, session=None):
         retv[person] = get_personal_data(person, session=session)
     return retv
 
+def analyze_standings(result):
+    #i = 0
+    #column_indices_by_name = {}
+    #for column_header in result["standings"][0]:
+    #    column_indices_by_name[column_header] = i
+    #    i += 1
+    num_players = len(result["standings"]) - 1
+    max_rank_to_stay = num_players - result["num_relegations"]
+    
+    
 
 if __name__ == "__main__":
     print(dumps(get_rundle_personal(79, 'E_Zephyr_Div_2'), indent=4))

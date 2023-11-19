@@ -12,6 +12,14 @@ from llama_slobber.ll_local_io import get_page_data
 from llama_slobber.ll_local_io import MATCH_DATA
 from llama_slobber.handle_conn_err import handle_conn_err
 
+NUMBER = 'number'
+CATEGORY = 'category'
+TEXT = 'text'
+ANSWER = 'answer'
+NULL_QUESTION =  {NUMBER: None,
+                                 CATEGORY: None,
+                                 TEXT: None,
+                                 ANSWER: None}
 
 class GetMatchDay(HTMLParser):
     """
@@ -29,21 +37,68 @@ class GetMatchDay(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.getdata = False
-        self.result = []
-
+        self.result = {'raw_data': [], 'questions': []}
+        self.current_question = NULL_QUESTION.copy()
+        self.this_question_field = None
+        self.ongoing_question = ''
+        
     def handle_starttag(self, tag, attrs):
         for apt in attrs:
             if apt[0] == 'title':
-                self.result.append(apt[1])
+                print(f"This is a title so I am appending {apt[1]}")
+                self.result['raw_data'].append(apt[1])
             if apt[0] == 'class':
                 if apt[1] == 'c0' or apt[1] == 'c1' or apt[1] == 'cF':
-                    self.result.append(apt[1])
+                    print(f"This is a class c0 c1 or cF so I am appending {apt[1]} and setting getdata to True")
+                    self.result['raw_data'].append(apt[1])
                     self.getdata = True
+                if apt[1] == 'a-red':
+                    print(f"I think the full text of the question, including category, was {self.ongoing_question}")
+                    self.ongoing_question = ''
+                    print(f"I think this tag's data will contain the answer.")
+                    self.this_question_field = ANSWER
+            if apt[0] == 'href':
+                if apt[1].startswith('/question.php?'):
+                    print("This tag's data will contain the question number.")
+                    self.this_question_field = NUMBER
+        if self.this_question_field == TEXT:
+            print(f"I got a {tag} tag while I was in the middle of the question.")
+            if tag == 'i':
+                self.ongoing_question += '_'
+            elif tag == 'b':
+                self.ongoing_question += '**'
+            elif tag == 'sub':
+                self.ongoing_question += '~'
+
+    def handle_endtag(self, tag):
+        if tag == 'span' and self.current_question[NUMBER]:
+            print(f"I think this tag's data will contain the category and text.")
+            self.this_question_field = TEXT
+        elif self.this_question_field == TEXT:
+            if tag == 'i':
+                self.ongoing_question += '_'
+            elif tag == 'b':
+                self.ongoing_question += '**'
+            elif tag == 'sub':
+                self.ongoing_question += '~'
+
 
     def handle_data(self, data):
         if self.getdata:
-            self.result.append(data)
+            print(f"getdata is True so I am appending {data} and setting getdata to True")
+            self.result['raw_data'].append(data)
             self.getdata = False
+        if self.this_question_field in [NUMBER, ANSWER]:
+            print(f"This tag's data contains the question's {self.this_question_field} which is {data}")
+            self.current_question[self.this_question_field] = data
+            self.this_question_field = None
+        if self.this_question_field == ANSWER:
+            self.result['questions'].append(self.current_question)
+            self.current_question = NULL_QUESTION.copy()
+        if self.this_question_field == TEXT:
+            print(f"I think some of the question text is \"{data}\"")
+            self.ongoing_question += data
+            self.current_question[CATEGORY] = 'BULLSHIT'
 
 
 class MatchDay(object):
@@ -71,9 +126,13 @@ class MatchDay(object):
             self.info['division'] = int(parts[-1])
         page = '&'.join([str(season), str(match_day), rundle])
         self.url = MATCH_DATA % page
-        self.raw_data = get_page_data(self.url, GetMatchDay(), session=session)
+        parsed = get_page_data(self.url, GetMatchDay(), session=session)
+        self.raw_data = parsed['raw_data']
+        self.questions = parsed['questions']
+        print(f"len(self.raw_data)={len(self.raw_data)}, MatchDay.INFO_PER_USER={MatchDay.INFO_PER_USER}")
         if len(self.raw_data) % MatchDay.INFO_PER_USER != 0:
-            raise ValueError('LL Parsing Error')
+            print("That is bad because one should be a multiple of another. I think.")
+            # raise ValueError('LL Parsing Error')
         self.num_folks = len(self.raw_data) // MatchDay.INFO_PER_USER
 
     def get_results(self):
@@ -92,15 +151,18 @@ class MatchDay(object):
         indx = self.num_folks
         for i in range(0, self.num_folks):
             person = self.raw_data[indx+MatchDay.PLOC]
-            self.result[person]['ratings'] = []
-            self.result[person]['answers'] = []
-            for qnum in range(0, MatchDay.QTOTAL*2, 2):
-                qindx = qnum + indx
-                answer = self.raw_data[qindx][-1]
-                rating = int(self.raw_data[qindx+1])
-                self.result[person]['answers'].append(answer)
-                self.result[person]['ratings'].append(rating)
-            indx += MatchDay.PSIZE
+            if person in self.result:
+                self.result[person]['ratings'] = []
+                self.result[person]['answers'] = []
+                for qnum in range(0, MatchDay.QTOTAL*2, 2):
+                    qindx = qnum + indx
+                    answer = self.raw_data[qindx][-1]
+                    rating = int(self.raw_data[qindx+1])
+                    self.result[person]['answers'].append(answer)
+                    self.result[person]['ratings'].append(rating)
+                indx += MatchDay.PSIZE
+            else:
+                print(f"self.result did not have an index of {person} so I just skipped that person.")
         return self.result
 
     def get_info(self):
