@@ -1,7 +1,9 @@
 import random
+import sys
 from llama_slobber import get_matchday
 
-questions = get_matchday(99, 5, "B_Galaxy")[2]
+matchday = get_matchday(99, sys.argv[2], "C_Galaxy")
+questions = matchday[2]
 
 max_answer_length = max([len(question["answer"]) for question in questions])
 intended_length = max_answer_length + random.randint(10, 20)

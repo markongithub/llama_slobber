@@ -36,10 +36,11 @@ class GetMatchDay(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.getdata = False
-        self.result = {"raw_data": [], "questions": []}
+        self.result = {"raw_data": [], "questions": [], "date_heading": None}
         self.current_question = NULL_QUESTION.copy()
         self.this_question_field = None
         self.ongoing_question = ""
+        self.in_date_heading = False
 
     def handle_starttag(self, tag, attrs):
         for apt in attrs:
@@ -77,6 +78,8 @@ class GetMatchDay(HTMLParser):
                 self.ongoing_question += "**"
             elif tag == "sub":
                 self.ongoing_question += "~"
+        if tag == "h1":
+            self.in_date_heading = True
 
     def handle_endtag(self, tag):
         if tag == "span" and self.current_question[NUMBER]:
@@ -89,6 +92,8 @@ class GetMatchDay(HTMLParser):
                 self.ongoing_question += "**"
             elif tag == "sub":
                 self.ongoing_question += "~"
+        elif tag == "h1":
+            self.in_date_heading = False
 
     def handle_data(self, data):
         if self.getdata:
@@ -113,6 +118,8 @@ class GetMatchDay(HTMLParser):
             print(f'I think some of the question text is "{data}"')
             self.ongoing_question += data
             self.current_question[CATEGORY] = "BULLSHIT"
+        if self.in_date_heading:
+            self.result["date_heading"] = data
 
 
 class MatchDay(object):
