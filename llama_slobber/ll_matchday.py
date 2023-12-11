@@ -36,7 +36,7 @@ class GetMatchDay(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.getdata = False
-        self.result = {"raw_data": [], "questions": [], "date_heading": None}
+        self.result = {"raw_data": [], "questions": [], "date": None}
         self.current_question = NULL_QUESTION.copy()
         self.this_question_field = None
         self.ongoing_question = ""
@@ -151,6 +151,7 @@ class MatchDay(object):
         parsed = get_page_data(self.url, GetMatchDay(), session=session)
         self.raw_data = parsed["raw_data"]
         self.questions = parsed["questions"]
+        self.info["date"] = parsed["date_heading"].strip().split(":", 1)[0]
         print(
             f"len(self.raw_data)={len(self.raw_data)}, MatchDay.INFO_PER_USER={MatchDay.INFO_PER_USER}"
         )
