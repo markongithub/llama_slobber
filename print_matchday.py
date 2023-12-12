@@ -2,7 +2,7 @@ import random
 import sys
 from llama_slobber import get_matchday
 
-league_number = 99  # FIX THIS
+league_number = sys.argv[1]
 matchday_number = sys.argv[2]
 matchday = get_matchday(league_number, matchday_number, "C_Galaxy")
 questions = matchday[2]
