@@ -14,11 +14,16 @@ date = matchday[1]["date"]
 # December 8, 2023: LL99 Match Day 17
 print(f"{date}: LL{league_number} Match Day {matchday_number}")
 print()
+first_question = True
 for question in questions:
-    print(f"{question['number']}. {question['text']}")
+    if first_question:
+        first_question = False
+    else:
+        print(">")
+
+    print(f"> {question['number']}. {question['text']}")
     padded = f" {question['answer']}".rjust(intended_length + 1, "_")
-    print(f">!`{padded}`!<")
-    print()
+    print(f"> >!`{padded}`!<")
 
 print()
 url = f"https://learnedleague.com/match.php?{league_number}&{matchday_number}"
