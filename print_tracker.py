@@ -24,5 +24,5 @@ for player in tracked_results:
             players_by_question[i].append(player)
 for i in range(6):
     print(
-        f"Q{i}: {len(players_by_question[i])}/{total_players} {players_by_question[i]}"
+        f"Q{i+1}: {len(players_by_question[i])}/{total_players} {players_by_question[i]}"
     )
