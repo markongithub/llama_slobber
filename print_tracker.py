@@ -9,7 +9,6 @@ tracked_results = {}
 total_players = 0
 TRACKED = secret_tracking_list.TRACKED
 for division in TRACKED:
-    print(f"Trying to retrieve {division}")
     matchday = get_matchday(league_number, matchday_number, division)
     results = matchday[0]
     players = TRACKED[division]
@@ -19,7 +18,6 @@ for division in TRACKED:
 
 players_by_question = [[], [], [], [], [], []]
 for player in tracked_results:
-    print(f"Results for {player}: {tracked_results[player]}")
     answers = tracked_results[player]["answers"]
     for i in range(6):
         if answers[i] == "1":

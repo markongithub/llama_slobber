@@ -45,33 +45,23 @@ class GetMatchDay(HTMLParser):
     def handle_starttag(self, tag, attrs):
         for apt in attrs:
             if apt[0] == "title":
-                print(f"This is a title so I am appending {apt[1]}")
                 self.result["raw_data"].append(apt[1])
             if apt[0] == "class":
                 if apt[1] == "c0" or apt[1] == "c1" or apt[1] == "cF":
-                    print(
-                        f"This is a class c0 c1 or cF so I am appending {apt[1]} and setting getdata to True"
-                    )
                     self.result["raw_data"].append(apt[1])
                     self.getdata = True
                 if apt[1] == "a-red":
-                    print(
-                        f"I think the full text of the question, including category, was {self.ongoing_question}"
-                    )
                     end_category_index = self.ongoing_question.find(" - ")
                     category = self.ongoing_question[1:end_category_index]
                     text = self.ongoing_question[(end_category_index + 3) :]
                     self.current_question[CATEGORY] = category
                     self.current_question[TEXT] = text
                     self.ongoing_question = ""
-                    print(f"I think this tag's data will contain the answer.")
                     self.this_question_field = ANSWER
             if apt[0] == "href":
                 if apt[1].startswith("/question.php?"):
-                    print("This tag's data will contain the question number.")
                     self.this_question_field = NUMBER
         if self.this_question_field == TEXT:
-            print(f"I got a {tag} tag while I was in the middle of the question.")
             if tag == "i":
                 self.ongoing_question += "_"
             elif tag == "b":
@@ -83,7 +73,6 @@ class GetMatchDay(HTMLParser):
 
     def handle_endtag(self, tag):
         if tag == "span" and self.current_question[NUMBER]:
-            print(f"I think this tag's data will contain the category and text.")
             self.this_question_field = TEXT
         elif self.this_question_field == TEXT:
             if tag == "i":
@@ -93,30 +82,21 @@ class GetMatchDay(HTMLParser):
             elif tag == "sub":
                 self.ongoing_question += "~"
         elif tag == "h1":
-            print("I think we are exiting the date heading.")
             self.in_date_heading = False
 
     def handle_data(self, data):
         if self.getdata:
-            print(
-                f"getdata is True so I am appending {data} and setting getdata to True"
-            )
             self.result["raw_data"].append(data)
             self.getdata = False
         if self.this_question_field in [NUMBER, ANSWER]:
-            print(
-                f"This tag's data contains the question's {self.this_question_field} which is {data}"
-            )
             self.current_question[self.this_question_field] = data
         if self.this_question_field == NUMBER:
             self.this_question_field = None
         if self.this_question_field == ANSWER:
             self.result["questions"].append(self.current_question)
-            print(f"self.result.questions is now {self.result['questions']}")
             self.current_question = NULL_QUESTION.copy()
             self.this_question_field = None
         if self.this_question_field == TEXT:
-            print(f'I think some of the question text is "{data}"')
             self.ongoing_question += data
             self.current_question[CATEGORY] = "BULLSHIT"
         if self.in_date_heading:
@@ -147,14 +127,10 @@ class MatchDay(object):
             self.info["division"] = int(parts[-1])
         page = "&".join([str(season), str(match_day), rundle])
         self.url = MATCH_DATA % page
-        print("About to enter get_page_data")
         parsed = get_page_data(self.url, GetMatchDay(), session=session)
         self.raw_data = parsed["raw_data"]
         self.questions = parsed["questions"]
         self.info["date"] = parsed["date_heading"].strip().split(":", 1)[0]
-        print(
-            f"len(self.raw_data)={len(self.raw_data)}, MatchDay.INFO_PER_USER={MatchDay.INFO_PER_USER}"
-        )
         discrepancy = len(self.raw_data) % MatchDay.INFO_PER_USER
         if discrepancy == 1:
             print(f"raw_data is too long by 1, so I am going to drop the first element, {self.raw_data[0]}")
@@ -176,15 +152,12 @@ class MatchDay(object):
             return self.result
         for i in range(0, self.num_folks, 2):
             self.result[self.raw_data[i]] = {"opp": self.raw_data[i + 1]}
-            print(f"The opponent of {self.raw_data[i]} is {self.raw_data[i + 1]}")
             self.result[self.raw_data[i + 1]] = {"opp": self.raw_data[i]}
         indx = self.num_folks
-        for i in range(len(self.raw_data)):
-            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
+#        for i in range(len(self.raw_data)):
+#            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
 
-        print(f"keys from self.result: {self.result.keys()}")
         for i in range(0, self.num_folks):
-            print(f"indx is {indx} so we will look for the person at {indx + MatchDay.PLOC}")
             person = self.raw_data[indx + MatchDay.PLOC]
             if person in self.result:
                 self.result[person]["ratings"] = []
@@ -230,7 +203,6 @@ def get_matchday(season, day, rundle, session=None):
         The second entry is a dictionary of values related to the entire
         match day object (league, rundle, division, day, season).
     """
-    print("about to enter MatchDay constructor")
     matchday = MatchDay(season, day, rundle, session=session)
     return [matchday.get_results(), matchday.get_info(), matchday.questions]
 
