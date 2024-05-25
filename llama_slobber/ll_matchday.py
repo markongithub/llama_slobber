@@ -133,7 +133,9 @@ class MatchDay(object):
         self.info["date"] = parsed["date_heading"].strip().split(":", 1)[0]
         discrepancy = len(self.raw_data) % MatchDay.INFO_PER_USER
         if discrepancy == 1:
-            print(f"raw_data is too long by 1, so I am going to drop the first element, {self.raw_data[0]}")
+            print(
+                f"raw_data is too long by 1, so I am going to drop the first element, {self.raw_data[0]}"
+            )
             self.raw_data.pop(0)
         elif discrepancy:
             raise ValueError(f"We have {discrepancy} elements too many in raw_data.")
@@ -154,8 +156,8 @@ class MatchDay(object):
             self.result[self.raw_data[i]] = {"opp": self.raw_data[i + 1]}
             self.result[self.raw_data[i + 1]] = {"opp": self.raw_data[i]}
         indx = self.num_folks
-#        for i in range(len(self.raw_data)):
-#            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
+        #        for i in range(len(self.raw_data)):
+        #            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
 
         for i in range(0, self.num_folks):
             person = self.raw_data[indx + MatchDay.PLOC]
