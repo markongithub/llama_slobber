@@ -93,6 +93,7 @@ class GetMatchDay(HTMLParser):
             elif tag == "sub":
                 self.ongoing_question += "~"
         elif tag == "h1":
+            print("I think we are exiting the date heading.")
             self.in_date_heading = False
 
     def handle_data(self, data):
@@ -134,8 +135,6 @@ class MatchDay(object):
     QTOTAL = 6
 
     def __init__(self, season, match_day, rundle, session=None):
-        if session is None:
-            session = get_session()
         self.info = {}
         self.info["season"] = season
         self.info["day"] = match_day
@@ -148,6 +147,7 @@ class MatchDay(object):
             self.info["division"] = int(parts[-1])
         page = "&".join([str(season), str(match_day), rundle])
         self.url = MATCH_DATA % page
+        print("About to enter get_page_data")
         parsed = get_page_data(self.url, GetMatchDay(), session=session)
         self.raw_data = parsed["raw_data"]
         self.questions = parsed["questions"]
@@ -155,8 +155,12 @@ class MatchDay(object):
         print(
             f"len(self.raw_data)={len(self.raw_data)}, MatchDay.INFO_PER_USER={MatchDay.INFO_PER_USER}"
         )
-        if len(self.raw_data) % MatchDay.INFO_PER_USER != 0:
-            print("That is bad because one should be a multiple of another. I think.")
+        discrepancy = len(self.raw_data) % MatchDay.INFO_PER_USER
+        if discrepancy == 1:
+            print(f"raw_data is too long by 1, so I am going to drop the first element, {self.raw_data[0]}")
+            self.raw_data.pop(0)
+        elif discrepancy:
+            raise ValueError(f"We have {discrepancy} elements too many in raw_data.")
             # raise ValueError('LL Parsing Error')
         self.num_folks = len(self.raw_data) // MatchDay.INFO_PER_USER
 
@@ -172,9 +176,15 @@ class MatchDay(object):
             return self.result
         for i in range(0, self.num_folks, 2):
             self.result[self.raw_data[i]] = {"opp": self.raw_data[i + 1]}
+            print(f"The opponent of {self.raw_data[i]} is {self.raw_data[i + 1]}")
             self.result[self.raw_data[i + 1]] = {"opp": self.raw_data[i]}
         indx = self.num_folks
+        for i in range(len(self.raw_data)):
+            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
+
+        print(f"keys from self.result: {self.result.keys()}")
         for i in range(0, self.num_folks):
+            print(f"indx is {indx} so we will look for the person at {indx + MatchDay.PLOC}")
             person = self.raw_data[indx + MatchDay.PLOC]
             if person in self.result:
                 self.result[person]["ratings"] = []
@@ -220,8 +230,7 @@ def get_matchday(season, day, rundle, session=None):
         The second entry is a dictionary of values related to the entire
         match day object (league, rundle, division, day, season).
     """
-    if session is None:
-        session = get_session()
+    print("about to enter MatchDay constructor")
     matchday = MatchDay(season, day, rundle, session=session)
     return [matchday.get_results(), matchday.get_info(), matchday.questions]
 

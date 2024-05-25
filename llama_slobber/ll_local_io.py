@@ -36,7 +36,9 @@ def get_session():
     Returns: logged in requests session to be used in later operations
     """
     config = configparser.ConfigParser()
+    print("about to read logindata")
     config.read(INPUTDATA)
+    print("got past logindata")
     payload = {'login': 'Login'}
     for attrib in ['username', 'password']:
         payload[attrib] = config['DEFAULT'][attrib]
@@ -45,6 +47,7 @@ def get_session():
         loginfile = config['DEFAULT']['loginfile']
     except KeyError:
         loginfile = LOGINFILE
+    crash
     ses1.post(loginfile, data=payload)
     return ses1
 
@@ -61,12 +64,10 @@ def get_page_data(url, parser, session=None, cache_path='./cache'):
     Returns:
         data collected by parser
     """
-    if session is None:
-        session = get_session()
-    main_data = session.get(url)
     if cache_path:
         cache_filename = f"{cache_path}/{url[30:]}"
         try:
+            print("Trying to find cache...")
             with open(cache_filename, 'r') as file:
                 text = file.read()
                 print(f"Loaded {cache_filename} from disk")
@@ -76,6 +77,9 @@ def get_page_data(url, parser, session=None, cache_path='./cache'):
                 with open(cache_filename, 'w') as f:
                     f.write(text)
     else:
+        if session is None:
+            session = get_session()
+
         text = session.get(url).text
     parser1 = parser
     parser1.feed(text)
