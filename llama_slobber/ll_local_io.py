@@ -108,6 +108,8 @@ def get_page_data(url, parser, session=None, cache_path="./cache"):
     Returns:
         data collected by parser
     """
+    if session is None:
+        session = get_session()
     text = get_page_text(url, session, cache_path)
     parser1 = parser
     parser1.feed(text)

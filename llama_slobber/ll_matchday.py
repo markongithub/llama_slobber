@@ -115,6 +115,8 @@ class MatchDay(object):
     QTOTAL = 6
 
     def __init__(self, season, match_day, rundle, session=None):
+        if session is None:
+            session = get_session()
         self.info = {}
         self.info["season"] = season
         self.info["day"] = match_day
@@ -205,6 +207,8 @@ def get_matchday(season, day, rundle, session=None):
         The second entry is a dictionary of values related to the entire
         match day object (league, rundle, division, day, season).
     """
+    if session is None:
+        session = get_session()
     matchday = MatchDay(season, day, rundle, session=session)
     return [matchday.get_results(), matchday.get_info(), matchday.questions]
 
