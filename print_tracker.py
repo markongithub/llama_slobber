@@ -1,6 +1,6 @@
 import random
 import sys
-from llama_slobber import get_matchday
+from llama_slobber import get_matchday, get_session
 import secret_tracking_list
 
 league_number = sys.argv[1]
@@ -8,8 +8,9 @@ matchday_number = sys.argv[2]
 tracked_results = {}
 total_players = 0
 TRACKED = secret_tracking_list.TRACKED
+session = get_session()
 for division in TRACKED:
-    matchday = get_matchday(league_number, matchday_number, division)
+    matchday = get_matchday(league_number, matchday_number, division, session)
     results = matchday[0]
     players = TRACKED[division]
     total_players += len(players)

@@ -59,6 +59,7 @@ def get_requests_session():
         loginfile = config["DEFAULT"]["loginfile"]
     except KeyError:
         loginfile = LOGINFILE
+    print("Logging in with username and password.")
     ses1.post(loginfile, data=payload)
     return ses1
 
