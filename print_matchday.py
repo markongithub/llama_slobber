@@ -7,6 +7,9 @@ matchday_number = sys.argv[2]
 matchday = get_matchday(league_number, matchday_number, "C_Galaxy")
 questions = matchday[2]
 
+if league_number == "101" and matchday_number == "21":
+  questions[2]["answer"] = "TITLE IX (but they accepted the Phoenician 9)"
+  questions[3]["answer"] = "OLIVE BRINE (but they accepted olive juice)"
 max_answer_length = max([len(question["answer"]) for question in questions])
 intended_length = max_answer_length + random.randint(10, 20)
 
