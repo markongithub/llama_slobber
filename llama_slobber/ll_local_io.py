@@ -59,7 +59,7 @@ def get_requests_session():
         loginfile = config["DEFAULT"]["loginfile"]
     except KeyError:
         loginfile = LOGINFILE
-    print("Logging in with username and password.")
+    print("Logging in with username and password - ideally we only do this once.")
     ses1.post(loginfile, data=payload)
     return ses1
 
@@ -84,7 +84,7 @@ def get_page_text(url, session=None, cache_path="./cache"):
                 print(f"Loaded {cache_filename} from disk")
                 return text
         except FileNotFoundError:
-            print(f"Cache not found on disk, retrieving from web")
+            print(f"Cache not found at {cache_filename}, retrieving from web")
     if session is None:
         session = get_session()
 
