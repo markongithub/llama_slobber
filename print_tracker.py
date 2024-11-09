@@ -31,6 +31,15 @@ for i in range(6):
     print(
         f"Q{i+1}: {len(players_by_question[i])}/{submitted_players} {sorted(players_by_question[i])}"
     )
+
+
+def number_description(number):
+    if number == submitted_players:
+        return f"a perfect {number}"
+    else:
+        return number
+
+
 print(
-    f"Out of {submitted_players} tracked players, {len(players_by_question[0])} got Q1, {len(players_by_question[1])} Q2, {len(players_by_question[2])} Q3, {len(players_by_question[3])} Q4, {len(players_by_question[4])} Q5, and {len(players_by_question[5])} Q6."
+    f"Out of {submitted_players} tracked players, {number_description(len(players_by_question[0]))} got Q1, {number_description(len(players_by_question[1]))} Q2, {number_description(len(players_by_question[2]))} Q3, {number_description(len(players_by_question[3]))} Q4, {number_description(len(players_by_question[4]))} Q5, and {number_description(len(players_by_question[5]))} Q6."
 )
