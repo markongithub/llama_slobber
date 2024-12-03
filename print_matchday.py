@@ -8,17 +8,21 @@ matchday = get_matchday(league_number, matchday_number, "A_Galaxy")
 questions = matchday[2]
 
 if league_number == "102" and matchday_number == "20":
-  questions[2]["answer"] = "SOY SAUCE (and merely \"soy\" was NOT accepted)"
+    questions[2]["answer"] = 'SOY SAUCE (and merely "soy" was NOT accepted)'
 if league_number == "103" and matchday_number == "2":
-  questions[1]["answer"] = "PUNIC (and \"Phoenician\" was NOT accepted)"
+    questions[1]["answer"] = 'PUNIC (and "Phoenician" was NOT accepted)'
 if league_number == "103" and matchday_number == "2":
-  questions[0]["answer"] = "ICE HOCKEY (but just \"hockey\" was accepted too)"
+    questions[0]["answer"] = 'ICE HOCKEY (but just "hockey" was accepted too)'
 if league_number == "103" and matchday_number == "4":
-  questions[0]["answer"] = "LIFE IN HELL (and \"is\" was NOT accepted)"
+    questions[0]["answer"] = 'LIFE IN HELL (and "is" was NOT accepted)'
 if league_number == "103" and matchday_number == "9":
-  questions[0]["answer"] = "MUSCLE SHOALS (you can spell that first word the other way)"
+    questions[0][
+        "answer"
+    ] = "MUSCLE SHOALS (you can spell that first word the other way)"
 if league_number == "103" and matchday_number == "11":
-  questions[5]["answer"] = "GUACAMOLE (but, per the note below, ANY answer was counted as correct)"
+    questions[5][
+        "answer"
+    ] = "GUACAMOLE (but, per the note below, ANY answer was counted as correct)"
 max_answer_length = max([len(question["answer"]) for question in questions])
 intended_length = max_answer_length + random.randint(10, 20)
 
