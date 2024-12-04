@@ -1,4 +1,3 @@
-import random
 import sys
 from llama_slobber import get_matchday
 
@@ -24,7 +23,12 @@ if league_number == "103" and matchday_number == "11":
         "answer"
     ] = "GUACAMOLE (but, per the note below, ANY answer was counted as correct)"
 max_answer_length = max([len(question["answer"]) for question in questions])
-intended_length = max_answer_length + random.randint(10, 20)
+# A value between 0 and 9 based on the lengths of the questions. It will look
+# random but be the same on every run for a given match day.
+deterministic_random_looking_value = (
+    sum([len(question["text"]) for question in questions]) % 10
+)
+intended_length = max_answer_length + 10 + deterministic_random_looking_value
 
 date = matchday[1]["date"]
 # December 8, 2023: LL99 Match Day 17
