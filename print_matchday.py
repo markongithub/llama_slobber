@@ -22,6 +22,16 @@ if league_number == "103" and matchday_number == "11":
     questions[5][
         "answer"
     ] = "GUACAMOLE (but, per the note below, ANY answer was counted as correct)"
+if league_number == "103" and matchday_number == "15":
+    questions[1]["answer"] = 'GETTING REAL ("being" was NOT accepted)'
+if league_number == "103" and matchday_number == "19":
+    questions[3]["answer"] = 'AUSTRALIAN RULES FOOTBALL ("Aussie" was accepted)'
+if league_number == "103" and matchday_number == "20":
+    questions[3]["answer"] = '5000 METERS ("5k" was accepted)'
+if league_number == "103" and matchday_number == "21":
+    questions[1][
+        "answer"
+    ] = "JOHN PAUL (I) (the French form of the name was accepted; maybe others were too?)"
 max_answer_length = max([len(question["answer"]) for question in questions])
 # A value between 0 and 9 based on the lengths of the questions. It will look
 # random but be the same on every run for a given match day.
