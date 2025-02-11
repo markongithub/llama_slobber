@@ -36,19 +36,23 @@ class GetMatchDay(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.getdata = False
-        self.result = {"raw_data": [], "questions": [], "date": None}
+        self.result = {"raw_data": [], "questions": [], "date": None, "maximum_promotion_rank": -1, "minimum_relegation_rank": None}
         self.current_question = NULL_QUESTION.copy()
         self.this_question_field = None
         self.ongoing_question = ""
         self.in_date_heading = False
+        self.promotion_rank = False
+        self.relegation_rank = False
 
     def handle_starttag(self, tag, attrs):
         for apt in attrs:
             if apt[0] == "title":
                 self.result["raw_data"].append(apt[1])
+                # print(f"Appending title {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
             if apt[0] == "class":
                 if apt[1] == "c0" or apt[1] == "c1" or apt[1] == "cF":
                     self.result["raw_data"].append(apt[1])
+                    # print(f"Appending class {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
                     self.getdata = True
                 if apt[1] == "a-red":
                     end_category_index = self.ongoing_question.find(" - ")
@@ -58,6 +62,10 @@ class GetMatchDay(HTMLParser):
                     self.current_question[TEXT] = text
                     self.ongoing_question = ""
                     self.this_question_field = ANSWER
+                if apt[1] == "promotion":
+                    self.promotion_rank = True
+                if apt[1] == "relegation" and self.result["minimum_relegation_rank"] is None:
+                    self.relegation_rank = True
             if apt[0] == "href":
                 if apt[1].startswith("/question.php?"):
                     self.this_question_field = NUMBER
@@ -87,6 +95,7 @@ class GetMatchDay(HTMLParser):
     def handle_data(self, data):
         if self.getdata:
             self.result["raw_data"].append(data)
+            # print(f"Appending {data} to raw_data, whose length is now {len(self.result['raw_data'])}")
             self.getdata = False
         if self.this_question_field in [NUMBER, ANSWER]:
             self.current_question[self.this_question_field] = data
@@ -101,6 +110,17 @@ class GetMatchDay(HTMLParser):
             self.current_question[CATEGORY] = "BULLSHIT"
         if self.in_date_heading:
             self.result["date_heading"] = data
+        if self.promotion_rank:
+            current_rank = int(data)
+            print(f"{current_rank} is good enough for promotion in this division.")
+            if current_rank > self.result["maximum_promotion_rank"]:
+                self.result["maximum_promotion_rank"] = current_rank
+            self.promotion_rank = False
+        if self.relegation_rank:
+            current_rank = int(data)
+            print(f"{current_rank} will get you relegated in this division.")
+            self.result["minimum_relegation_rank"] = current_rank
+            self.relegation_rank = False
 
 
 class MatchDay(object):
@@ -133,6 +153,8 @@ class MatchDay(object):
         self.raw_data = parsed["raw_data"]
         self.questions = parsed["questions"]
         self.info["date"] = parsed["date_heading"].strip().split(":", 1)[0]
+        self.info["maximum_promotion_rank"] = parsed["maximum_promotion_rank"]
+        self.info["minimum_relegation_rank"] = parsed["minimum_relegation_rank"]
         discrepancy = len(self.raw_data) % MatchDay.INFO_PER_USER
         if discrepancy == 1:
             print(
@@ -163,7 +185,9 @@ class MatchDay(object):
 
         for i in range(0, self.num_folks):
             person = self.raw_data[indx + MatchDay.PLOC]
+            rank = i + 1
             if person in self.result:
+                self.result[person]["rank"] = rank
                 self.result[person]["ratings"] = []
                 self.result[person]["answers"] = []
                 for qnum in range(0, MatchDay.QTOTAL * 2, 2):

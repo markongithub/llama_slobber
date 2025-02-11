@@ -3,7 +3,7 @@ from llama_slobber import get_matchday
 
 league_number = sys.argv[1]
 matchday_number = sys.argv[2]
-matchday = get_matchday(league_number, matchday_number, "A_Galaxy")
+matchday = get_matchday(league_number, matchday_number, "C_Galaxy_Div_2")
 questions = matchday[2]
 
 if league_number == "102" and matchday_number == "20":
