@@ -32,6 +32,8 @@ def print_matchday(league_number, matchday_number, division, shadow_url=None):
         questions[1][
             "answer"
         ] = "JOHN PAUL (I) (the French form of the name was accepted; maybe others were too?)"
+    if league_number == "104" and matchday_number == "1":
+        questions[2]["answer"] = 'MILK OF MAGNESIA (no, they did not accept it spelled -UM)'
     max_answer_length = max([len(question["answer"]) for question in questions])
     # A value between 0 and 9 based on the lengths of the questions. It will look
     # random but be the same on every run for a given match day.
