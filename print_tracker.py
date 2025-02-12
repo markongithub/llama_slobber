@@ -2,9 +2,13 @@ import random
 import sys
 from llama_slobber import get_matchday, get_session
 import secret_tracking_list
+from print_matchday import print_matchday
 
 league_number = sys.argv[1]
 matchday_number = sys.argv[2]
+shadow_url = None
+if len(sys.argv) > 3:
+    shadow_url = sys.argv[3]
 tracked_results = {}
 championship_slots = []
 promotion_slots = []
@@ -28,6 +32,8 @@ for division in TRACKED:
         if info["minimum_relegation_rank"] and rank >= info["minimum_relegation_rank"]:
             relegation_slots.append(player)
 
+
+print_matchday(league_number, matchday_number, TRACKED.popitem()[0], shadow_url)
 
 players_by_question = [[], [], [], [], [], []]
 forfeiters = set()
