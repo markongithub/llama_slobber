@@ -193,7 +193,11 @@ class MatchDay(object):
                 for qnum in range(0, MatchDay.QTOTAL * 2, 2):
                     qindx = qnum + indx
                     answer = self.raw_data[qindx][-1]
-                    rating = int(self.raw_data[qindx + 1])
+                    try:
+                      rating = int(self.raw_data[qindx + 1])
+                    except ValueError:
+                      print(f"Uh this isn't a number so I'll call it 0: {self.raw_data[qindx + 1]}")
+                      rating = 0
                     self.result[person]["answers"].append(answer)
                     self.result[person]["ratings"].append(rating)
                 indx += MatchDay.PSIZE
