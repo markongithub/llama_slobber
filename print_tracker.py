@@ -35,20 +35,27 @@ for division in TRACKED:
 
 print_matchday(league_number, matchday_number, TRACKED.popitem()[0], shadow_url)
 
-players_by_question = [[], [], [], [], [], []]
+right_by_question = [[], [], [], [], [], []]
+wrong_by_question = [[], [], [], [], [], []]
 forfeiters = set()
 for player in tracked_results:
     answers = tracked_results[player]["answers"]
     for i in range(6):
         if answers[i] == "1":
-            players_by_question[i].append(player)
+            right_by_question[i].append(player)
+        if answers[i] == "0":
+            wrong_by_question[i].append(player)
         if answers[i] == "F":
             forfeiters.add(player)
 submitted_players = total_players - len(forfeiters)
 for i in range(6):
-    print(
-        f"Q{i+1}: {len(players_by_question[i])}/{submitted_players} {sorted(players_by_question[i])}"
-    )
+    if submitted_players == len(right_by_question[i]):
+        player_list = "everyone!"
+    elif submitted_players - len(right_by_question[i]) < 5:
+        player_list = f"everyone but {sorted(wrong_by_question[i])}"
+    else:
+        player_list = sorted(right_by_question[i])
+    print(f"Q{i+1}: {len(right_by_question[i])}/{submitted_players} ({player_list})")
 
 
 def number_description(number):
@@ -59,7 +66,7 @@ def number_description(number):
 
 
 print(
-    f"Out of {submitted_players} tracked players, {number_description(len(players_by_question[0]))} got Q1, {number_description(len(players_by_question[1]))} Q2, {number_description(len(players_by_question[2]))} Q3, {number_description(len(players_by_question[3]))} Q4, {number_description(len(players_by_question[4]))} Q5, and {number_description(len(players_by_question[5]))} Q6."
+    f"Out of {submitted_players} tracked players, {number_description(len(right_by_question[0]))} got Q1, {number_description(len(right_by_question[1]))} Q2, {number_description(len(right_by_question[2]))} Q3, {number_description(len(right_by_question[3]))} Q4, {number_description(len(right_by_question[4]))} Q5, and {number_description(len(right_by_question[5]))} Q6."
 )
 print(f"In line for championship: {championship_slots}")
 print(f"In line for promotion: {promotion_slots}")
