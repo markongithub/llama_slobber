@@ -4,7 +4,7 @@
 Csv file reader, and one-day utilities (one-day data is the most common
 use of csv files by Learned League).
 """
-from llama_slobber.ll_local_io import get_session
+from llama_slobber.ll_local_io import get_session, get_page_text
 from llama_slobber.ll_local_io import LLHEADER
 
 
@@ -38,8 +38,8 @@ def read_csv_data(url, session=None):
     """
     if session is None:
         session = get_session()
-    main_data = session.get(url)
-    flines = main_data.text.strip().split('\n')
+    main_text = get_page_text(url, session)
+    flines = main_text.strip().split('\n')
     retval = []
     for peep in flines[1:]:
         newpeep = peep.split(',')
