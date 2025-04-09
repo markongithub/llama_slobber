@@ -55,9 +55,11 @@ def parse_oneday_get_date(oneday, session=None):
     urlv = "%s.php?%s" % (ONEDAYS, oneday)
     one_day_str = get_page_data(urlv, GetDateFromUrl(), session=session)
     extract = one_day_str.strip()
+    print(f"extract: {extract}")
     if not extract:
         return date.today() + timedelta(days=1)
     extdate = extract.split(':')[0]
+    print(f"extdate: {extdate}")
     return datetime.strptime(extdate, "%B %d, %Y").date()
 
 

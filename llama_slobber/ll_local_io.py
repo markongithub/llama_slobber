@@ -76,6 +76,7 @@ def get_page_text(url, session=None, cache_path="./cache"):
     Returns:
         text from web or cache
     """
+    print(f"going to retrieve {url}")
     if cache_path:
         cache_filename = f"{cache_path}/{url[30:]}"
         try:
