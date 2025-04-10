@@ -4,6 +4,8 @@
 """
 Function used to extract a list of players for a oneday
 """
+import re
+import sys
 from datetime import date
 from html.parser import HTMLParser
 
@@ -29,7 +31,7 @@ FILE_PATTERNS = ["/%s.shtml", "/%s.php", ".php?%s", "/results.php?%s&1"]
 
 
 @handle_conn_err
-def ll_oneday_better(oneday, session=None):
+def ll_oneday_optimal_moneys(oneday, session=None):
     """
     Extract a list of players from the oneday passed in
     """
@@ -48,7 +50,7 @@ def ll_oneday_better(oneday, session=None):
         list(zip(correct_answers_by_question, range(1, 13))), reverse=True
     )
     if corrects_with_indices[4][0] == corrects_with_indices[5][0]:
-        raise (
+        raise Exception(
             "There is a tie for fifth-hardest question so I can't calculate optimal moneys."
         )
     optimal_money_indices = set([q[1] for q in corrects_with_indices[0:5]])
@@ -63,6 +65,60 @@ def ll_oneday_better(oneday, session=None):
             )
 
     return optimal_money_indices
+
+
+@handle_conn_err
+def parse_oneday_get_media(oneday, session=None):
+    if session is None:
+        session = get_session()
+    urlv = "%s.php?%s" % (ONEDAYS, oneday)
+    media_output = get_page_data(urlv, GetMedia(), session=session)
+    # print(media_output)
+    return media_output
+
+
+def print_media_flarum(media):
+    for question, url in media:
+        print(f"[Q{question} media](https://learnedleague.com{url})")
+
+
+class GetMedia(HTMLParser):
+    """
+    Parse page to get media URLs.
+    """
+
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.current_question = None
+        self.result = []
+
+    def handle_starttag(self, tag, attrs):
+        """
+        find matchday indicator
+        """
+        if tag == "div":
+            for apt in attrs:
+                if apt[0] == "id":
+                    match = re.search(r"Q(\d+)OPEN", apt[1])
+                    if match:
+                        self.current_question = match.group(1)
+
+        if tag == "source":
+            for apt in attrs:
+                if apt[0] == "src":
+                    url = apt[1]
+                    if self.current_question:
+                        self.result.append((self.current_question, url))
+                    else:
+                        raise Exception(
+                            "I found media but I don't know what question it's for."
+                        )
+
+    def handle_data(self, data):
+        """
+        Get date if available
+        """
+        pass
 
 
 @handle_conn_err
@@ -136,4 +192,6 @@ class GetOldOnedayData(HTMLParser):
 
 
 if __name__ == "__main__":
-    print(ll_oneday_better("6718"))
+    oneday_id = sys.argv[1]
+    media = parse_oneday_get_media(oneday_id)
+    print_media_flarum(media)
