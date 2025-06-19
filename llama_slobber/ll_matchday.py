@@ -50,7 +50,7 @@ class GetMatchDay(HTMLParser):
                 self.result["raw_data"].append(apt[1])
                 # print(f"Appending title {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
             if apt[0] == "class":
-                if apt[1] == "c0" or apt[1] == "c1" or apt[1] == "cF":
+                if apt[1] in ["c0", "c1", "cF"]:
                     self.result["raw_data"].append(apt[1])
                     # print(f"Appending class {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
                     self.getdata = True
