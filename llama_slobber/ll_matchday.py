@@ -49,14 +49,14 @@ class GetMatchDay(HTMLParser):
         for apt in attrs:
             if apt[0] == "title":
                 self.result["raw_data"].append(apt[1])
-                print(f"Appending title {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
+                # print(f"Appending title {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
             if apt[0] == "class":
                 if apt[1] in ["c0", "c1", "cF"]:
                     self.result["raw_data"].append(apt[1])
                     # print(f"Appending class {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
                     self.getdata = True
                 if apt[1].endswith("std-mid") or apt[1].endswith("std-mid mpd"):
-                    print(f"Setting getdata to True because class={apt[1]}")
+                    # print(f"Setting getdata to True because class={apt[1]}")
                     self.getdata = True
                 if apt[1] == "a-red":
                     end_category_index = self.ongoing_question.find(" - ")
@@ -99,7 +99,7 @@ class GetMatchDay(HTMLParser):
     def handle_data(self, data):
         if self.getdata:
             self.result["raw_data"].append(data)
-            print(f"Appending {data} to raw_data, whose length is now {len(self.result['raw_data'])}")
+            # print(f"Appending {data} to raw_data, whose length is now {len(self.result['raw_data'])}")
             self.getdata = False
         if self.this_question_field in [NUMBER, ANSWER]:
             self.current_question[self.this_question_field] = data
@@ -116,13 +116,13 @@ class GetMatchDay(HTMLParser):
             self.result["date_heading"] = data
         if self.promotion_rank:
             current_rank = int(data)
-            print(f"{current_rank} is good enough for promotion in this division.")
+            # print(f"{current_rank} is good enough for promotion in this division.")
             if current_rank > self.result["maximum_promotion_rank"]:
                 self.result["maximum_promotion_rank"] = current_rank
             self.promotion_rank = False
         if self.relegation_rank:
             current_rank = int(data)
-            print(f"{current_rank} will get you relegated in this division.")
+            # print(f"{current_rank} will get you relegated in this division.")
             self.result["minimum_relegation_rank"] = current_rank
             self.relegation_rank = False
 
@@ -133,8 +133,18 @@ class MatchDay(object):
     day in a rundle.
     """
 
-    INFO_PER_USER = 24
-    PLOC = INFO_PER_USER - 2
+    # raw data consists of, where P is the number of players:
+    # P names
+    # then P more rows of length INFO_PER_USER - 1, currently 24
+    # within those rows, the indices are:
+    # 0-11: their result for each of the 6 questions, and the defensive score they put on it
+    # 12: rank
+    # 13: name
+    # 14-23: W		L		T		PTS		MPD		TMP		TCA		DE		FL		3PT
+    # INFO_PER_USER includes the initial add in the raw data of the player names. Then there are PSIZE data per row in the standings.
+    INFO_PER_USER = 25
+    # PLOC is where in the standings row we find the player's name. It is 13th, after the 6 question results and the 6 defensive scores. 
+    PLOC = 13
     PSIZE = INFO_PER_USER - 1
     QTOTAL = 6
 
@@ -159,11 +169,12 @@ class MatchDay(object):
         self.info["date"] = parsed["date_heading"].strip().split(":", 1)[0]
         self.info["maximum_promotion_rank"] = parsed["maximum_promotion_rank"]
         self.info["minimum_relegation_rank"] = parsed["minimum_relegation_rank"]
+        # print(f"We have {len(self.raw_data)} raw data with {MatchDay.INFO_PER_USER} per user.")
         discrepancy = len(self.raw_data) % MatchDay.INFO_PER_USER
         if discrepancy == 1:
-            print(
-                f"raw_data is too long by 1, so I am going to drop the first element, {self.raw_data[0]}"
-            )
+            # print(
+            #     f"raw_data is too long by 1, so I am going to drop the first element, {self.raw_data[0]}"
+            #  )
             self.raw_data.pop(0)
         elif discrepancy:
             raise ValueError(f"We have {len(self.raw_data)} elements in raw_data which is not 0 or 1 mod {MatchDay.INFO_PER_USER}.")
@@ -184,10 +195,11 @@ class MatchDay(object):
             self.result[self.raw_data[i]] = {"opp": self.raw_data[i + 1]}
             self.result[self.raw_data[i + 1]] = {"opp": self.raw_data[i]}
         indx = self.num_folks
-        for i in range(len(self.raw_data)):
-            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
+        # for i in range(len(self.raw_data)):
+        #     print(f"self.raw_data[{i}]: {self.raw_data[i]}")
 
         for i in range(0, self.num_folks):
+            # print(f"indx is now {indx} so I will look for the player name at {indx + MatchDay.PLOC}")
             person = self.raw_data[indx + MatchDay.PLOC]
             rank = i + 1
             if person in self.result:
