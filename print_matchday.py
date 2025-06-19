@@ -34,13 +34,31 @@ def print_matchday(league_number, matchday_number, division, shadow_url=None):
         ] = "JOHN PAUL (I) (the French form of the name was accepted; maybe others were too?)"
     if league_number == "104" and matchday_number == "1":
         questions[2]["answer"] = 'MILK OF MAGNESIA (no, they did not accept it spelled -UM)'
+    if league_number == "105" and matchday_number == "4":
+        questions[1]["answer"] = 'SPRAT (and they accepted it with a leading "Jack")'
+    if league_number == "105" and matchday_number == "5":
+        questions[4]["answer"] = 'INTEGRAL (and Fly says they accepted "integration")'
+    if league_number == "105" and matchday_number == "8":
+        questions[4]["answer"] = 'CHRISTIAN DEMOCRATIC UNION (CDU) ("Christian Democrats" was accepted too)'
+    if league_number == "105" and matchday_number == "12":
+        questions[2]["answer"] = 'BOIL (prepending "crab" was allowed and maybe other shellfish too)'
+    if league_number == "105" and matchday_number == "16":
+        questions[5]["answer"] = 'NIGIRI (first they accepted "onagiri" then they took it back)'
+    if league_number == "105" and matchday_number == "18":
+        questions[4]["answer"] = 'SITTING/INCUMBENT VICE-PRESIDENT (simply "vice president" was not enough)'
+    if league_number == "105" and matchday_number == "23":
+        questions[2]["answer"] = 'MICKEY (and they did not accept "Nicky")'
     max_answer_length = max([len(question["answer"]) for question in questions])
     # A value between 0 and 9 based on the lengths of the questions. It will look
     # random but be the same on every run for a given match day.
     deterministic_random_looking_value = (
         sum([len(question["text"]) for question in questions]) % 10
     )
-    intended_length = max_answer_length + 10 + deterministic_random_looking_value
+    print(f"Maximum answer length: {max_answer_length}")
+    if max_answer_length > 60:
+        intended_length = max_answer_length
+    else:
+        intended_length = max_answer_length + 10 + deterministic_random_looking_value
 
     date = matchday[1]["date"]
     # December 8, 2023: LL99 Match Day 17
