@@ -45,14 +45,18 @@ class GetMatchDay(HTMLParser):
         self.relegation_rank = False
 
     def handle_starttag(self, tag, attrs):
+        # print(f"tag={tag}, attrs={attrs}")
         for apt in attrs:
             if apt[0] == "title":
                 self.result["raw_data"].append(apt[1])
-                # print(f"Appending title {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
+                print(f"Appending title {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
             if apt[0] == "class":
                 if apt[1] in ["c0", "c1", "cF"]:
                     self.result["raw_data"].append(apt[1])
                     # print(f"Appending class {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
+                    self.getdata = True
+                if apt[1].endswith("std-mid") or apt[1].endswith("std-mid mpd"):
+                    print(f"Setting getdata to True because class={apt[1]}")
                     self.getdata = True
                 if apt[1] == "a-red":
                     end_category_index = self.ongoing_question.find(" - ")
@@ -95,7 +99,7 @@ class GetMatchDay(HTMLParser):
     def handle_data(self, data):
         if self.getdata:
             self.result["raw_data"].append(data)
-            # print(f"Appending {data} to raw_data, whose length is now {len(self.result['raw_data'])}")
+            print(f"Appending {data} to raw_data, whose length is now {len(self.result['raw_data'])}")
             self.getdata = False
         if self.this_question_field in [NUMBER, ANSWER]:
             self.current_question[self.this_question_field] = data
@@ -129,7 +133,7 @@ class MatchDay(object):
     day in a rundle.
     """
 
-    INFO_PER_USER = 14
+    INFO_PER_USER = 24
     PLOC = INFO_PER_USER - 2
     PSIZE = INFO_PER_USER - 1
     QTOTAL = 6
@@ -162,7 +166,7 @@ class MatchDay(object):
             )
             self.raw_data.pop(0)
         elif discrepancy:
-            raise ValueError(f"We have {discrepancy} elements too many in raw_data.")
+            raise ValueError(f"We have {len(self.raw_data)} elements in raw_data which is not 0 or 1 mod {MatchDay.INFO_PER_USER}.")
             # raise ValueError('LL Parsing Error')
         self.num_folks = len(self.raw_data) // MatchDay.INFO_PER_USER
 
@@ -180,8 +184,8 @@ class MatchDay(object):
             self.result[self.raw_data[i]] = {"opp": self.raw_data[i + 1]}
             self.result[self.raw_data[i + 1]] = {"opp": self.raw_data[i]}
         indx = self.num_folks
-        #        for i in range(len(self.raw_data)):
-        #            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
+        for i in range(len(self.raw_data)):
+            print(f"self.raw_data[{i}]: {self.raw_data[i]}")
 
         for i in range(0, self.num_folks):
             person = self.raw_data[indx + MatchDay.PLOC]
