@@ -46,14 +46,14 @@ def ll_oneday_optimal_moneys(oneday, session=None):
             correct_answers_by_question[i] + int(player_record[i + 4])
             for i in range(12)
         ]
-    corrects_with_indices = sorted(
-        list(zip(correct_answers_by_question, range(1, 13))), reverse=True
-    )
+    corrects_with_indices = sorted(list(zip(correct_answers_by_question, range(1, 13))))
     if corrects_with_indices[4][0] == corrects_with_indices[5][0]:
         raise Exception(
             "There is a tie for fifth-hardest question so I can't calculate optimal moneys."
         )
+    print(f"Correct answer counts with indices: {corrects_with_indices}")
     optimal_money_indices = set([q[1] for q in corrects_with_indices[0:5]])
+    print(f"Optimal moneys: {optimal_money_indices}")
     # indices 16 to 27
     for player_record in data:
         moneyed = set([i for i in range(1, 13) if player_record[i + 15] == "1"])
@@ -192,6 +192,8 @@ class GetOldOnedayData(HTMLParser):
 
 
 if __name__ == "__main__":
+    session = get_session()
     oneday_id = sys.argv[1]
-    media = parse_oneday_get_media(oneday_id)
+    media = parse_oneday_get_media(oneday_id, session)
     print_media_flarum(media)
+    ll_oneday_optimal_moneys(oneday_id, session)

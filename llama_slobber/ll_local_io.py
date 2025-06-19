@@ -18,6 +18,7 @@ LOGINFILE = LLHEADER + "/ucp.php?mode=login"
 USER_DATA = LLHEADER + "/profiles/previous.php?%s"
 QHIST = LLHEADER + "/profiles/qhist.php?%s"
 MATCH_DATA = LLHEADER + "/match.php?%s"
+MINI_MATCH_DATA = LLHEADER + "/mini/match.php?%s"
 ONEDAYS = LLHEADER + "/oneday"
 STANDINGS = "/standings.php?"
 LLSTANDINGS = LLHEADER + STANDINGS
