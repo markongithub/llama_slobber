@@ -207,16 +207,16 @@ class MatchDay(object):
                 if assumed_rank != rank_from_standings:
                     raise ValueError(f"We are on player {assumed_rank} but they appear to have rank {rank_from_standings} in the standings. We parsed it wrong.")
                 self.result[person]["rank"] = assumed_rank
-                self.result[person]["w"] = self.raw_data[indx + 14]
-                self.result[person]["l"] = self.raw_data[indx + 15]
-                self.result[person]["t"] = self.raw_data[indx + 16]
-                self.result[person]["pts"] = self.raw_data[indx + 17]
-                self.result[person]["mpd"] = self.raw_data[indx + 18]
-                self.result[person]["tmp"] = self.raw_data[indx + 19]
-                self.result[person]["tca"] = self.raw_data[indx + 20]
+                self.result[person]["w"] = int(self.raw_data[indx + 14])
+                self.result[person]["l"] = int(self.raw_data[indx + 15])
+                self.result[person]["t"] = int(self.raw_data[indx + 16])
+                self.result[person]["pts"] = int(self.raw_data[indx + 17])
+                self.result[person]["mpd"] = int(self.raw_data[indx + 18])
+                self.result[person]["tmp"] = int(self.raw_data[indx + 19])
+                self.result[person]["tca"] = int(self.raw_data[indx + 20])
                 self.result[person]["de"] = self.raw_data[indx + 21]
-                self.result[person]["fl"] = self.raw_data[indx + 22]
-                self.result[person]["3pt"] = self.raw_data[indx + 23]
+                self.result[person]["fl"] = int(self.raw_data[indx + 22])
+                self.result[person]["3pt"] = int(self.raw_data[indx + 23])
                 self.result[person]["ratings"] = []
                 self.result[person]["answers"] = []
                 for qnum in range(0, MatchDay.QTOTAL * 2, 2):

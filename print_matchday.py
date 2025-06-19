@@ -4,7 +4,30 @@ from llama_slobber import get_matchday
 
 def print_matchday(league_number, matchday_number, division, shadow_url=None):
     matchday = get_matchday(league_number, matchday_number, division)
+
+    results = matchday[0]
+    info = matchday[1]
     questions = matchday[2]
+    points_by_rank = {
+        results[player]["rank"]: results[player]["pts"] for player in results
+    }
+    max_points_left = 2 * (25 - int(matchday_number))
+    for player in results:
+        if results[player]["rank"] == 1:
+            rival_points_for_first = points_by_rank[2]
+        else:
+            rival_points_for_first = points_by_rank[1]
+        if results[player]["pts"] + max_points_left < rival_points_for_first:
+            print(f"{player} cannot possibly win first place.")
+        elif rival_points_for_first + max_points_left < results[player]["pts"]:
+            print(f"{player} has CLINCHED first place!")
+        else:
+            points_to_clinch = (
+                rival_points_for_first + max_points_left + 1 - results[player]["pts"]
+            )
+            print(
+                f"{player} needs {points_to_clinch} more standings points to clinch first."
+            )
 
     if league_number == "102" and matchday_number == "20":
         questions[2]["answer"] = 'SOY SAUCE (and merely "soy" was NOT accepted)'
@@ -33,19 +56,29 @@ def print_matchday(league_number, matchday_number, division, shadow_url=None):
             "answer"
         ] = "JOHN PAUL (I) (the French form of the name was accepted; maybe others were too?)"
     if league_number == "104" and matchday_number == "1":
-        questions[2]["answer"] = 'MILK OF MAGNESIA (no, they did not accept it spelled -UM)'
+        questions[2][
+            "answer"
+        ] = "MILK OF MAGNESIA (no, they did not accept it spelled -UM)"
     if league_number == "105" and matchday_number == "4":
         questions[1]["answer"] = 'SPRAT (and they accepted it with a leading "Jack")'
     if league_number == "105" and matchday_number == "5":
         questions[4]["answer"] = 'INTEGRAL (and Fly says they accepted "integration")'
     if league_number == "105" and matchday_number == "8":
-        questions[4]["answer"] = 'CHRISTIAN DEMOCRATIC UNION (CDU) ("Christian Democrats" was accepted too)'
+        questions[4][
+            "answer"
+        ] = 'CHRISTIAN DEMOCRATIC UNION (CDU) ("Christian Democrats" was accepted too)'
     if league_number == "105" and matchday_number == "12":
-        questions[2]["answer"] = 'BOIL (prepending "crab" was allowed and maybe other shellfish too)'
+        questions[2][
+            "answer"
+        ] = 'BOIL (prepending "crab" was allowed and maybe other shellfish too)'
     if league_number == "105" and matchday_number == "16":
-        questions[5]["answer"] = 'NIGIRI (first they accepted "onagiri" then they took it back)'
+        questions[5][
+            "answer"
+        ] = 'NIGIRI (first they accepted "onagiri" then they took it back)'
     if league_number == "105" and matchday_number == "18":
-        questions[4]["answer"] = 'SITTING/INCUMBENT VICE-PRESIDENT (simply "vice president" was not enough)'
+        questions[4][
+            "answer"
+        ] = 'SITTING/INCUMBENT VICE-PRESIDENT (simply "vice president" was not enough)'
     if league_number == "105" and matchday_number == "23":
         questions[2]["answer"] = 'MICKEY (and they did not accept "Nicky")'
     max_answer_length = max([len(question["answer"]) for question in questions])
@@ -89,4 +122,4 @@ if __name__ == "__main__":
     shadow_url = None
     if len(sys.argv) > 3:
         shadow_url = sys.argv[3]
-    print_matchday(league_number, matchday_number, "C_Galaxy_Div_2", shadow_url)
+    print_matchday(league_number, matchday_number, "C_Galaxy_Div_1", shadow_url)
