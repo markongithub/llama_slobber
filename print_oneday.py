@@ -60,8 +60,10 @@ def ll_oneday_optimal_moneys(oneday, session=None):
         if moneyed == optimal_money_indices:
             print(f"{player_record[0]} moneyed PERFECTLY!")
         else:
+            should_have = sorted(optimal_money_indices.difference(moneyed))
+            should_not_have = sorted(moneyed.difference(optimal_money_indices))
             print(
-                f"{player_record[0]} should have moneyed {optimal_money_indices.difference(moneyed)} and not moneyed {moneyed.difference(optimal_money_indices)}"
+                f"{player_record[0]} should have moneyed {should_have} and not moneyed {should_not_have}"
             )
 
     return optimal_money_indices

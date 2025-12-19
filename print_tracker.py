@@ -65,8 +65,12 @@ def number_description(number):
         return number
 
 
+if forfeiters:
+    players_disclaimer = " who actually submitted answers"
+else:
+    players_disclaimer = ""
 print(
-    f"Out of {submitted_players} tracked players, {number_description(len(right_by_question[0]))} got Q1, {number_description(len(right_by_question[1]))} Q2, {number_description(len(right_by_question[2]))} Q3, {number_description(len(right_by_question[3]))} Q4, {number_description(len(right_by_question[4]))} Q5, and {number_description(len(right_by_question[5]))} Q6."
+    f"Out of {submitted_players} tracked players{players_disclaimer}, {number_description(len(right_by_question[0]))} got Q1, {number_description(len(right_by_question[1]))} Q2, {number_description(len(right_by_question[2]))} Q3, {number_description(len(right_by_question[3]))} Q4, {number_description(len(right_by_question[4]))} Q5, and {number_description(len(right_by_question[5]))} Q6."
 )
 print(f"In line for championship: {championship_slots}")
 print(f"In line for promotion: {promotion_slots}")

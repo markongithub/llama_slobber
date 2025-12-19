@@ -81,6 +81,18 @@ def print_matchday(league_number, matchday_number, division, shadow_url=None):
         ] = 'SITTING/INCUMBENT VICE-PRESIDENT (simply "vice president" was not enough)'
     if league_number == "105" and matchday_number == "23":
         questions[2]["answer"] = 'MICKEY (and they did not accept "Nicky")'
+    if league_number == "106" and matchday_number == "10":
+        questions[1]["answer"] = 'DESICCANT (but they apparently accepted "desiccate")'
+    if league_number == "106" and matchday_number == "17":
+        questions[3]["answer"] = 'TO THE MANNER BORN (and "manor" was allowed)'
+    if league_number == "106" and matchday_number == "24":
+        questions[5]["answer"] = 'APPLE (CORPS) (yes they accepted "records")'
+    if league_number == "107" and matchday_number == "4":
+        questions[2]["answer"] = 'DACHSUND (they also accepted Wiener, not sure what else)'
+    if league_number == "107" and matchday_number == "8":
+        questions[0]["answer"] = 'LUNAR MARIA/SEAS OF THE MOON (they let me have "areas of the moon")'
+    if league_number == "107" and matchday_number == "18":
+        questions[5]["answer"] = 'SNL ("Saturday Night Live" was NOT accepted)'
     max_answer_length = max([len(question["answer"]) for question in questions])
     # A value between 0 and 9 based on the lengths of the questions. It will look
     # random but be the same on every run for a given match day.
