@@ -55,7 +55,7 @@ class GetMatchDay(HTMLParser):
                     self.result["raw_data"].append(apt[1])
                     # print(f"Appending class {apt[1]} to raw_data, whose length is now {len(self.result['raw_data'])}")
                     self.getdata = True
-                if apt[1].endswith("std-mid") or apt[1].endswith("std-mid mpd"):
+                if apt[1].endswith("std-mid") or apt[1].endswith("std-mid mpd") or apt[1].endswith("std-rt") or apt[1].endswith("std-rt mpd") :
                     # print(f"Setting getdata to True because class={apt[1]}")
                     self.getdata = True
                 if apt[1] == "a-red":
@@ -169,8 +169,9 @@ class MatchDay(object):
         self.info["date"] = parsed["date_heading"].strip().split(":", 1)[0]
         self.info["maximum_promotion_rank"] = parsed["maximum_promotion_rank"]
         self.info["minimum_relegation_rank"] = parsed["minimum_relegation_rank"]
-        # print(f"We have {len(self.raw_data)} raw data with {MatchDay.INFO_PER_USER} per user.")
+        print(f"We have {len(self.raw_data)} raw data with {MatchDay.INFO_PER_USER} per user.")
         discrepancy = len(self.raw_data) % MatchDay.INFO_PER_USER
+        # print(f"discrepancy: {discrepancy}")
         if discrepancy == 1:
             # print(
             #     f"raw_data is too long by 1, so I am going to drop the first element, {self.raw_data[0]}"
