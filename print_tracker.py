@@ -1,7 +1,7 @@
 import random
 import sys
 from llama_slobber import get_matchday, get_session
-import secret_tracking_list
+from secret_tracking_list import TCA_RECORDS, TRACKED
 from print_matchday import print_matchday
 
 league_number = sys.argv[1]
@@ -13,8 +13,8 @@ tracked_results = {}
 championship_slots = []
 promotion_slots = []
 relegation_slots = []
+tca_record_chances = []
 total_players = 0
-TRACKED = secret_tracking_list.TRACKED
 session = get_session()
 for division in TRACKED:
     matchday = get_matchday(league_number, matchday_number, division, session)
@@ -22,6 +22,7 @@ for division in TRACKED:
     info = matchday[1]
     players = TRACKED[division]
     total_players += len(players)
+    questions_left = 6 * (25 - int(matchday_number))
     for player in players:
         tracked_results[player] = results[player]
         rank = results[player]["rank"]
@@ -31,6 +32,11 @@ for division in TRACKED:
             promotion_slots.append(player)
         if info["minimum_relegation_rank"] and rank >= info["minimum_relegation_rank"]:
             relegation_slots.append(player)
+        if player in TCA_RECORDS and questions_left <= 30:
+            record = TCA_RECORDS[player]
+            to_tie_record = record - results[player]["tca"]
+            if to_tie_record <= questions_left:
+                tca_record_chances.append((player, to_tie_record))
 
 
 print_matchday(league_number, matchday_number, TRACKED.popitem()[0], shadow_url)
@@ -75,3 +81,5 @@ print(
 print(f"In line for championship: {championship_slots}")
 print(f"In line for promotion: {promotion_slots}")
 print(f"In line for relegation: {relegation_slots}")
+for player, number in tca_record_chances:
+    print(f"{player} needs {number} correct answers to tie their record.")
