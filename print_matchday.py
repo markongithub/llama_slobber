@@ -88,11 +88,32 @@ def print_matchday(league_number, matchday_number, division, shadow_url=None):
     if league_number == "106" and matchday_number == "24":
         questions[5]["answer"] = 'APPLE (CORPS) (yes they accepted "records")'
     if league_number == "107" and matchday_number == "4":
-        questions[2]["answer"] = 'DACHSUND (they also accepted Wiener, not sure what else)'
+        questions[2][
+            "answer"
+        ] = "DACHSUND (they also accepted Wiener, not sure what else)"
     if league_number == "107" and matchday_number == "8":
-        questions[0]["answer"] = 'LUNAR MARIA/SEAS OF THE MOON (they let me have "areas of the moon")'
+        questions[0][
+            "answer"
+        ] = 'LUNAR MARIA/SEAS OF THE MOON (they let me have "areas of the moon")'
     if league_number == "107" and matchday_number == "18":
         questions[5]["answer"] = 'SNL ("Saturday Night Live" was NOT accepted)'
+    if league_number == "108" and matchday_number == "4":
+        questions[4][
+            "answer"
+        ] = 'ERWIN SCHRÖDINGER (They let me have it without the "N". Or the umlaut.)'
+    if league_number == "108" and matchday_number == "8":
+        questions[0]["answer"] = "PITTSBURGH (but they accepted the show name too)"
+        questions[3]["answer"] = "JUICE WRLD (both words required)"
+    if league_number == "108" and matchday_number == "10":
+        questions[3][
+            "answer"
+        ] = 'BABIES/INFANTS (they accepted "children", and "newborns" after SJ appealed it)'
+    if league_number == "108" and matchday_number == "18":
+        questions[3]["answer"] = "COSINE, SINE (which had to be in that order)"
+    if league_number == "108" and matchday_number == "23":
+        questions[4][
+            "answer"
+        ] = "KHMER EMPIRE (Cambodia not accepted which I think is wrong)"
     max_answer_length = max([len(question["answer"]) for question in questions])
     # A value between 0 and 9 based on the lengths of the questions. It will look
     # random but be the same on every run for a given match day.
