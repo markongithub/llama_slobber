@@ -4,6 +4,86 @@ from llama_slobber import get_matchday, get_session
 from secret_tracking_list import TCA_RECORDS, TRACKED
 from print_matchday import print_matchday
 
+
+def get_contention_statuses(
+    results, matchday_number, maximum_promotion_rank, minimum_relegation_rank
+):
+    number_one_points = None
+    number_two_points = None
+    points_inside_promotion = None
+    points_outside_promotion = None
+    points_inside_relegation = None
+    points_outside_relegation = None
+    for player, stats in results.items():
+        # These are probably ordered by rank but I want it to work even if
+        # they're not.
+        rank = int(stats["rank"])
+        points = int(stats["pts"])
+        if rank == 1:
+            number_one_points = points
+        if rank == 2:
+            number_two_points = points
+        if maximum_promotion_rank and rank == maximum_promotion_rank:
+            points_inside_promotion = points
+        if maximum_promotion_rank and rank == maximum_promotion_rank + 1:
+            points_outside_promotion = points
+        if minimum_relegation_rank and rank == minimum_relegation_rank - 1:
+            points_outside_relegation = points
+        if minimum_relegation_rank and rank == minimum_relegation_rank:
+            points_inside_relegation = points
+    statuses = {}
+    maximum_points_to_go = 2 * (25 - matchday_number)
+    for player, stats in results.items():
+        rank = int(stats["rank"])
+        points = int(stats["pts"])
+        points_to_beat_for_number_one = None
+        points_to_beat_for_promotion = None
+        points_to_beat_to_avoid_relegation = None
+        if rank == 1:
+            points_to_beat_for_number_one = number_two_points
+        else:
+            points_to_beat_for_number_one = number_one_points
+        if rank <= maximum_promotion_rank:
+            # you're in the promotion zone, so you only need to do better than
+            # the best player outside it.
+            points_to_beat_for_promotion = points_outside_promotion
+        else:
+            # you're outside the promotion zone, so you need to do better
+            # than the bottom player inside it.
+            points_to_beat_for_promotion = points_inside_promotion
+        if minimum_relegation_rank is None:
+            points_to_beat_to_avoid_relegation = None
+        elif rank < minimum_relegation_rank:
+            # you're outside the relegation zone, so you only need to do better
+            # than the best player inside it.
+            points_to_beat_to_avoid_relegation = points_inside_relegation
+        else:
+            # you're inside the promotion zone, so you need to do better
+            # than the bottom player above it.
+            points_to_beat_to_avoid_relegation = points_outside_relegation
+        necessary_points_for_number_one = necessary_points(
+            matchday_number, points, points_to_beat_for_number_one
+        )
+        if necessary_points_for_number_one <= 0:
+            statuses[player] = "has already clinched the division"
+        elif necessary_points_for_number_one == (maximum_points_to_go * 2) + 1:
+            statuses[player] = (
+                "can win the division if everything goes perfectly, but only via tiebreakers"
+            )
+        elif necessary_points_for_number_one <= (maximum_points_to_go * 2):
+            statuses[player] = (
+                f"needs {necessary_points_for_number_one} more standings points to win the division (or {necessary_points_for_number_one - 1} and tiebreakers)"
+            )
+        else:
+            statuses[player] = "cannot win the division"
+    return statuses
+
+
+def necessary_points(matchday_number, my_points, rival_points):
+    maximum_points_left = 2 * (25 - matchday_number)
+    return rival_points + maximum_points_left + 1 - my_points
+
+
 league_number = sys.argv[1]
 matchday_number = sys.argv[2]
 shadow_url = None
@@ -14,6 +94,7 @@ championship_slots = []
 promotion_slots = []
 relegation_slots = []
 tca_record_chances = []
+tracked_contention_statuses = {}
 total_players = 0
 session = get_session()
 for division in TRACKED:
@@ -23,8 +104,15 @@ for division in TRACKED:
     players = TRACKED[division]
     total_players += len(players)
     questions_left = 6 * (25 - int(matchday_number))
+    contention_statuses = get_contention_statuses(
+        results,
+        int(matchday_number),
+        info["maximum_promotion_rank"],
+        info["minimum_relegation_rank"],
+    )
     for player in players:
         tracked_results[player] = results[player]
+        tracked_contention_statuses[player] = contention_statuses[player]
         rank = results[player]["rank"]
         if division[0] == "A" and rank <= 3:
             championship_slots.append(player)
@@ -81,5 +169,7 @@ print(
 print(f"In line for championship: {championship_slots}")
 print(f"In line for promotion: {promotion_slots}")
 print(f"In line for relegation: {relegation_slots}")
+for player, status in tracked_contention_statuses.items():
+    print(f"{player} {status}")
 for player, number in tca_record_chances:
     print(f"{player} needs {number} correct answers to tie their record.")
