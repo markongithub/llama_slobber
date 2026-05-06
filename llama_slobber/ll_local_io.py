@@ -10,6 +10,8 @@ In the DEFAULT section of INPUTDATA, the following must be defined:
     password -- the LL password corresponding to username
 """
 import configparser
+import os
+import requests
 from playwright.sync_api import sync_playwright
 
 
@@ -25,7 +27,7 @@ LLSTANDINGS = LLHEADER + STANDINGS
 ARUNDLE = LLSTANDINGS + "%d&A_%s"
 INPUTDATA = "logindata.ini"
 TOTAL_MATCHES_PER_SEASON = 25
-
+TMP_PATH = "/tmp"
 
 
 class SessionWrapper:
@@ -41,6 +43,20 @@ class SessionWrapper:
                 browser = sync.chromium.launch_persistent_context(headless=True, user_data_dir="./user_data_dir",
                 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
                 self.playwright_page = browser.new_page()
+            if url.endswith(".csv"):
+                with self.playwright_page.expect_download() as download_info:
+                    #If we navigate without try, it will throw an exception and it will stop our script, so, we wrap it inside a try except block
+                    try:
+                        self.playwright_page.goto(url)
+                    except Exception as e:
+                        # Check if it's the specific "Download is starting" error
+                        if "Download is starting" not in str(e):
+                            raise e
+                    download = download_info.value
+                    temp_file = os.path.join(TMP_PATH, download.suggested_filename)
+                    download.save_as(temp_file)
+                    with open(temp_file, "r") as f:
+                        return f.read()
             self.playwright_page.goto(url)
             return self.playwright_page.content()
         else:
