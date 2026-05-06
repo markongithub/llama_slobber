@@ -80,6 +80,8 @@ class GetMatchDay(HTMLParser):
                 self.ongoing_question += "**"
             elif tag == "sub":
                 self.ongoing_question += "~"
+            elif tag == "br":
+                self.ongoing_question += "\n"
         if tag == "h1":
             self.in_date_heading = True
 
