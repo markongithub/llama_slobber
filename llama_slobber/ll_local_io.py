@@ -10,7 +10,7 @@ In the DEFAULT section of INPUTDATA, the following must be defined:
     password -- the LL password corresponding to username
 """
 import configparser
-import requests
+from playwright.sync_api import sync_playwright
 
 
 LLHEADER = "https://www.learnedleague.com"
@@ -27,14 +27,24 @@ INPUTDATA = "logindata.ini"
 TOTAL_MATCHES_PER_SEASON = 25
 
 
+class FakeRequestsResponse:
+    def __init__(self, text):
+      self.text = text
+
+
 class SessionWrapper:
     def __init__(self):
-        self.requests_session = None
+        self.page = None
 
     def get(self, url):
-        if self.requests_session is None:
-            self.requests_session = get_requests_session()
-        return self.requests_session.get(url)
+        if self.page is None:
+            print("Starting browser, hopefully we only do this once...")
+            sync = sync_playwright().start()
+            browser = sync.chromium.launch_persistent_context(headless=True, user_data_dir="./user_data_dir",
+                user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            self.page = browser.new_page()
+        self.page.goto(url)
+        return FakeRequestsResponse(self.page.content())
 
 
 def get_session():
@@ -83,7 +93,7 @@ def get_page_text(url, session=None, cache_path="./cache"):
         try:
             with open(cache_filename, "r") as file:
                 text = file.read()
-                print(f"Loaded {cache_filename} from disk")
+                print(f"Loaded {cache_filename} from disk, {len(text)} characters")
                 return text
         except FileNotFoundError:
             print(f"Cache not found at {cache_filename}, retrieving from web")
