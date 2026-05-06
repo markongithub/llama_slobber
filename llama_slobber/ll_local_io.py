@@ -27,25 +27,26 @@ INPUTDATA = "logindata.ini"
 TOTAL_MATCHES_PER_SEASON = 25
 
 
-class FakeRequestsResponse:
-    def __init__(self, text):
-      self.text = text
-
 
 class SessionWrapper:
     def __init__(self):
-        self.page = None
+        self.playwright_page = None
+        self.requests_session = None
 
-    def get(self, url):
-        if self.page is None:
-            print("Starting browser, hopefully we only do this once...")
-            sync = sync_playwright().start()
-            browser = sync.chromium.launch_persistent_context(headless=True, user_data_dir="./user_data_dir",
+    def get(self, url, use_playwright=True):
+        if use_playwright:
+            if self.playwright_page is None:
+                print("Starting browser, hopefully we only do this once...")
+                sync = sync_playwright().start()
+                browser = sync.chromium.launch_persistent_context(headless=True, user_data_dir="./user_data_dir",
                 user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-            self.page = browser.new_page()
-        self.page.goto(url)
-        return FakeRequestsResponse(self.page.content())
-
+                self.playwright_page = browser.new_page()
+            self.playwright_page.goto(url)
+            return self.playwright_page.content()
+        else:
+            if self.requests_session is None:
+                self.requests_session = get_requests_session()
+            return self.requests_session.get(url).text
 
 def get_session():
     return SessionWrapper()
@@ -100,7 +101,7 @@ def get_page_text(url, session=None, cache_path="./cache"):
     if session is None:
         session = get_session()
 
-    text = session.get(url).text
+    text = session.get(url)
     if cache_path:
         cache_filename = f"{cache_path}/{url[30:]}"
         with open(cache_filename, "w") as f:
