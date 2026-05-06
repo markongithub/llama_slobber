@@ -35,30 +35,42 @@ class SessionWrapper:
         self.playwright_page = None
         self.requests_session = None
 
+    def get_with_playwright(self, url):
+        print(f"get_with_playwright({url})")
+        if self.playwright_page is None:
+            print("Starting browser, hopefully we only do this once...")
+            sync = sync_playwright().start()
+            browser = sync.chromium.launch_persistent_context(headless=True, user_data_dir="./user_data_dir",
+            user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            self.playwright_page = browser.new_page()
+        if url.endswith(".csv"):
+            return self.get_csv_with_playwright(url)
+        self.playwright_page.goto(url)
+        content = self.playwright_page.content()
+        if content is None:
+            raise Exception("went to page and content was None")
+        print(f"content: {len(content)} characters")
+        return content
+    
+    def get_csv_with_playwright(self, url):
+        print(f"get_csv_with_playwright({url})")
+        with self.playwright_page.expect_download() as download_info:
+            #If we navigate without try, it will throw an exception and it will stop our script, so, we wrap it inside a try except block
+            try:
+                self.playwright_page.goto(url)
+            except Exception as e:
+                # Check if it's the specific "Download is starting" error
+                if "Download is starting" not in str(e):
+                    raise e
+            download = download_info.value
+            temp_file = os.path.join(TMP_PATH, download.suggested_filename)
+            download.save_as(temp_file)
+            with open(temp_file, "r") as f:
+                return f.read()
+
     def get(self, url, use_playwright=True):
         if use_playwright:
-            if self.playwright_page is None:
-                print("Starting browser, hopefully we only do this once...")
-                sync = sync_playwright().start()
-                browser = sync.chromium.launch_persistent_context(headless=True, user_data_dir="./user_data_dir",
-                user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-                self.playwright_page = browser.new_page()
-            if url.endswith(".csv"):
-                with self.playwright_page.expect_download() as download_info:
-                    #If we navigate without try, it will throw an exception and it will stop our script, so, we wrap it inside a try except block
-                    try:
-                        self.playwright_page.goto(url)
-                    except Exception as e:
-                        # Check if it's the specific "Download is starting" error
-                        if "Download is starting" not in str(e):
-                            raise e
-                    download = download_info.value
-                    temp_file = os.path.join(TMP_PATH, download.suggested_filename)
-                    download.save_as(temp_file)
-                    with open(temp_file, "r") as f:
-                        return f.read()
-            self.playwright_page.goto(url)
-            return self.playwright_page.content()
+            return self.get_with_playwright(url)
         else:
             if self.requests_session is None:
                 self.requests_session = get_requests_session()
