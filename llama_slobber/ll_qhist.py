@@ -26,13 +26,14 @@ class GetQhist(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         """
-        'liclosed' indicates a new category is coming up
+        'catname' indicates a new category is coming up
         'hrefs' to questions indicated a question
         'greendot.gif' is correct, 'reddot.gif' is incorrect.
         """
         for apt in attrs:
             if apt[0] == 'class':
-                if apt[1] == 'liclosed':
+                if apt[1] == 'catname':
+                    # print("Found catname...")
                     self.getkey = True
             if apt[0] == 'href':
                 if apt[1].startswith('/question.php'):
@@ -40,13 +41,22 @@ class GetQhist(HTMLParser):
                     partstr = apt[1][tindx:]
                     qvals = partstr.split('&')
                     self.lastq = '-'.join(qvals)
-            if apt[0] == 'src':
-                if apt[1].startswith('/images/misc/'):
+                    # print(f"tindx is {tindx} and self.lastq is {self.lastq}")
+            if apt[0] == 'aria-label':
+                if apt[1] == "Check":
+                    # print(f"This is a correct answer.")
+                    if not self.category:
+                        # print("We don't have a category so I'll skip this.")
+                        continue
                     lptr = self.result[self.category]
-                    if apt[1].endswith('greendot.gif'):
-                        lptr['correct'].append(self.lastq)
-                    if apt[1].endswith('reddot.gif'):
-                        lptr['wrong'].append(self.lastq)
+                    lptr['correct'].append(self.lastq)
+                if apt[1] == "X":
+                    # print(f"This is a wrong answer.")
+                    if not self.category:
+                        # print("We don't have a category so I'll skip this.")
+                        continue
+                    lptr = self.result[self.category]
+                    lptr['wrong'].append(self.lastq)
 
     def handle_data(self, data):
         """
@@ -55,6 +65,7 @@ class GetQhist(HTMLParser):
         if self.getkey:
             self.result[data] = {'correct': [], 'wrong': []}
             self.category = data
+            # print(f"Found category {self.category}")
             self.getkey = False
 
 
@@ -69,9 +80,10 @@ def get_qhist(player, session=None):
     if session is None:
         session = get_session()
     pname = player.lower()
+    # https://learnedleague.com/profiles.php?4965&9
     main_data = QHIST % pname
     return get_page_data(main_data, GetQhist(pname), session=session)
 
 
 if __name__ == "__main__":
-    print(get_qhist('ConryM_Illuminati=REAL?'))
+    print(get_qhist('4965'))

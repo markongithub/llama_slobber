@@ -18,7 +18,7 @@ from playwright.sync_api import sync_playwright
 LLHEADER = "https://www.learnedleague.com"
 LOGINFILE = LLHEADER + "/ucp.php?mode=login"
 USER_DATA = LLHEADER + "/profiles/previous.php?%s"
-QHIST = LLHEADER + "/profiles/qhist.php?%s"
+QHIST = LLHEADER + "/profiles.php?%s&9"
 MATCH_DATA = LLHEADER + "/match.php?%s"
 MINI_MATCH_DATA = LLHEADER + "/mini/match.php?%s"
 ONEDAYS = LLHEADER + "/oneday"
@@ -51,7 +51,7 @@ class SessionWrapper:
             raise Exception("went to page and content was None")
         print(f"content: {len(content)} characters")
         return content
-    
+
     def get_csv_with_playwright(self, url):
         print(f"get_csv_with_playwright({url})")
         with self.playwright_page.expect_download() as download_info:
