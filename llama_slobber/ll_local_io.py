@@ -13,7 +13,7 @@ import configparser
 import os
 import requests
 from playwright.sync_api import sync_playwright
-
+import time
 
 LLHEADER = "https://www.learnedleague.com"
 LOGINFILE = LLHEADER + "/ucp.php?mode=login"
@@ -28,15 +28,18 @@ ARUNDLE = LLSTANDINGS + "%d&A_%s"
 INPUTDATA = "logindata.ini"
 TOTAL_MATCHES_PER_SEASON = 25
 TMP_PATH = "/tmp"
-
+RATE_LIMIT_SECONDS = 1
 
 class SessionWrapper:
     def __init__(self):
         self.playwright_page = None
         self.requests_session = None
+        self.last_request_time = 0
 
     def get_with_playwright(self, url):
         print(f"get_with_playwright({url})")
+        if time.time() - self.last_request_time < RATE_LIMIT_SECONDS:
+            time.sleep(RATE_LIMIT_SECONDS - (time.time() - self.last_request_time))
         if self.playwright_page is None:
             print("Starting browser, hopefully we only do this once...")
             sync = sync_playwright().start()
@@ -46,6 +49,7 @@ class SessionWrapper:
         if url.endswith(".csv"):
             return self.get_csv_with_playwright(url)
         self.playwright_page.goto(url)
+        self.last_request_time = time.time()
         content = self.playwright_page.content()
         if content is None:
             raise Exception("went to page and content was None")
