@@ -13,6 +13,8 @@ def print_mini_matchday(minileague_id, matchday_number, shadow_url=None):
     if minileague_id == "not_a_real_minileague" and matchday_number == "2":
         questions[2]["answer"] = 'NORMAL ANSWERE (and a note on what else they did or did not accept)'
 
+    if minileague_id == "1990smusic" and matchday_number == "7":
+        questions[5]["answer"] = 'WHITNEY HOUSTON (yes I know the wording is fucked)'
     max_answer_length = max([len(question["answer"]) for question in questions])
     # A value between 0 and 9 based on the lengths of the questions. It will look
     # random but be the same on every run for a given match day.
