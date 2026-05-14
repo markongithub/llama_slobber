@@ -24,7 +24,7 @@ def print_mini_matchday(minileague_id, matchday_number, shadow_url=None):
     intended_length = max_answer_length + 10 + deterministic_random_looking_value
 
     date = matchday.info["date"]
-    minileague_name = minileague_pretty_names.get(minileague_id, minileague_id)
+    minileague_name = matchday.info["league_name"]
     # December 8, 2023: Math 3 Match Day 17
     print(f"{date}: {minileague_name} Mini-League Match Day {matchday_number}")
     print()

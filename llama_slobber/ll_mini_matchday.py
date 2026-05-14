@@ -7,6 +7,7 @@ Handle the compilation of information for a minileague match day.
 """
 from html.parser import HTMLParser
 
+import re
 from llama_slobber.ll_local_io import get_session
 from llama_slobber.ll_local_io import get_page_data
 from llama_slobber.ll_local_io import MINI_MATCH_DATA
@@ -28,6 +29,7 @@ class GetMiniMatchDay(HTMLParser):
         self.this_question_field = None
         self.ongoing_question = ""
         self.in_date_heading = False
+        self.in_match_day_heading = False
 
     def handle_starttag(self, tag, attrs):
         for apt in attrs:
@@ -63,7 +65,9 @@ class GetMiniMatchDay(HTMLParser):
         if tag == "h1":
             self.in_date_heading = True
         if tag == "br":
-            self.in_date_heading = False
+            if self.in_date_heading:
+                self.in_date_heading = False
+                self.in_match_day_heading = True
 
     def handle_endtag(self, tag):
         if tag == "span" and self.current_question[NUMBER]:
@@ -93,6 +97,11 @@ class GetMiniMatchDay(HTMLParser):
             self.ongoing_question += data
         if self.in_date_heading:
             self.result["date_heading"] = data
+        if self.in_match_day_heading:
+            # If we were using this more than once in the same code I'd compile it once at
+            # the top but meh.
+            self.result["league_name"] = re.sub(' Match Day.*', '', data)
+            self.in_match_day_heading = False
 
 
 class MiniMatchDay(object):
@@ -113,6 +122,7 @@ class MiniMatchDay(object):
         parsed = get_page_data(self.url, GetMiniMatchDay(), session=session)
         self.questions = parsed["questions"]
         self.info["date"] = parsed["date_heading"].strip()
+        self.info["league_name"] = parsed["league_name"].strip()
 
 
 @handle_conn_err
