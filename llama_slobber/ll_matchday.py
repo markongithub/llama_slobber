@@ -171,7 +171,7 @@ class MatchDay(object):
         self.info["date"] = parsed["date_heading"].strip().split(":", 1)[0]
         self.info["maximum_promotion_rank"] = parsed["maximum_promotion_rank"]
         self.info["minimum_relegation_rank"] = parsed["minimum_relegation_rank"]
-        print(f"We have {len(self.raw_data)} raw data with {MatchDay.INFO_PER_USER} per user.")
+        # print(f"We have {len(self.raw_data)} raw data with {MatchDay.INFO_PER_USER} per user.")
         discrepancy = len(self.raw_data) % MatchDay.INFO_PER_USER
         # print(f"discrepancy: {discrepancy}")
         if discrepancy == 1:
@@ -228,15 +228,17 @@ class MatchDay(object):
                     try:
                       rating = int(self.raw_data[qindx + 1])
                     except ValueError:
-                      print(f"Uh this isn't a number so I'll call it 0: {self.raw_data[qindx + 1]}")
+                      # this ambigious case usually means their opponent did not forfeit but was removed from the league
+                      #print(f"{person} {qnum} Uh this isn't a number so I'll call it 0: {self.raw_data[qindx + 1]}")
                       rating = 0
                     self.result[person]["answers"].append(answer)
                     self.result[person]["ratings"].append(rating)
                 indx += MatchDay.PSIZE
             else:
-                print(
-                    f"self.result did not have an index of {person} so I just skipped that person."
-                )
+                #print(
+                #    f"DEBUG: self.result did not have an index of {person} so I just skipped that person."
+                #)
+                pass
         return self.result
 
     def get_info(self):
