@@ -70,6 +70,8 @@ class GetMatchDay(HTMLParser):
                     self.promotion_rank = True
                 if apt[1] == "relegation" and self.result["minimum_relegation_rank"] is None:
                     self.relegation_rank = True
+                if apt[1] == "lh-pagetype":
+                    self.in_date_heading = True
             if apt[0] == "href":
                 if apt[1].startswith("/question.php?"):
                     self.this_question_field = NUMBER
@@ -82,8 +84,6 @@ class GetMatchDay(HTMLParser):
                 self.ongoing_question += "~"
             elif tag == "br":
                 self.ongoing_question += "\n"
-        if tag == "h1":
-            self.in_date_heading = True
 
     def handle_endtag(self, tag):
         if tag == "span" and self.current_question[NUMBER]:
@@ -116,6 +116,7 @@ class GetMatchDay(HTMLParser):
             self.current_question[CATEGORY] = "BULLSHIT"
         if self.in_date_heading:
             self.result["date_heading"] = data
+            self.in_date_heading = False
         if self.promotion_rank:
             current_rank = int(data)
             # print(f"{current_rank} is good enough for promotion in this division.")
