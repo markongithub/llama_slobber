@@ -1,13 +1,15 @@
 import sys
 from llama_slobber import get_qhist, get_matchday, get_session
-import time
+import csv
 
 if __name__ == "__main__":
     profile_number = sys.argv[1]
     session = get_session()
     qvals = get_qhist(profile_number, session)
     # {'AMER HIST': {'correct': ['108-22-5', '108-19-6', '94-3-2'], 'wrong': ['107-18-3'...
-    wrong_questions = qvals["CLASS MUSIC"]["wrong"]
+    wrong_questions = []
+    for category in qvals:
+        wrong_questions.extend(qvals[category]["wrong"])
     num_wrong_questions = len(wrong_questions)
     questions_counted = 0
     questions_to_output = []
@@ -19,5 +21,7 @@ if __name__ == "__main__":
         questions_counted += 1
         if questions_counted % 10 == 0:
             print(f"Questions processed: {questions_counted}/{num_wrong_questions}")
+    csv_out = csv.writer(sys.stdout)
+    csv_out.writerow(["Question", "Answer"])
     for question, answer in questions_to_output:
-        print(f"> {question}: {answer}")
+        csv_out.writerow([question, answer])
