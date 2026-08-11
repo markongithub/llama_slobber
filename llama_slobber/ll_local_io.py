@@ -13,6 +13,7 @@ import configparser
 import os
 import requests
 from playwright.sync_api import sync_playwright
+from playwright_stealth import Stealth
 import time
 
 LLHEADER = "https://www.learnedleague.com"
@@ -28,7 +29,7 @@ ARUNDLE = LLSTANDINGS + "%d&A_%s"
 INPUTDATA = "logindata.ini"
 TOTAL_MATCHES_PER_SEASON = 25
 TMP_PATH = "/tmp"
-RATE_LIMIT_SECONDS = 1
+RATE_LIMIT_SECONDS = 5
 
 class SessionWrapper:
     def __init__(self):
@@ -42,13 +43,14 @@ class SessionWrapper:
             time.sleep(RATE_LIMIT_SECONDS - (time.time() - self.last_request_time))
         if self.playwright_page is None:
             print("Starting browser, hopefully we only do this once...")
-            sync = sync_playwright().start()
-            browser = sync.chromium.launch_persistent_context(headless=True, user_data_dir="./user_data_dir",
-            user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+            sync = Stealth().use_sync(sync_playwright()).start()
+            browser = sync.chromium.launch_persistent_context(headless=False, user_data_dir="./user_data_dir", args=["--disable-blink-features=AutomationControlled"])
             self.playwright_page = browser.new_page()
+            webdriver_status = self.playwright_page.evaluate("navigator.webdriver")
+            print("webdriver_status should be False: ", webdriver_status)
         if url.endswith(".csv"):
             return self.get_csv_with_playwright(url)
-        self.playwright_page.goto(url)
+        self.playwright_page.goto(url, wait_until="networkidle", timeout=30000)
         self.last_request_time = time.time()
         content = self.playwright_page.content()
         if content is None:
